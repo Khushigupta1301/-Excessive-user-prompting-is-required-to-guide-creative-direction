@@ -1,0 +1,1525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>EUP — Documentation</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,300&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #0a0a0f;
+      --surface: #111118;
+      --card: #16161f;
+      --card2: #1c1c28;
+      --accent: #e8ff47;
+      --accent2: #ff4757;
+      --accent3: #00d2ff;
+      --accent4: #a855f7;
+      --success: #00ff88;
+      --warning: #ffa500;
+      --text: #f0f0f8;
+      --muted: #6b6b8a;
+      --muted2: #9090aa;
+      --border: rgba(255,255,255,0.07);
+      --border2: rgba(255,255,255,0.12);
+      --glow: rgba(232,255,71,0.15);
+      --sidebar-w: 268px;
+      --toc-w: 220px;
+      --nav-h: 60px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      cursor: none;
+      overflow-x: hidden;
+    }
+
+    /* ─── CURSOR ─── */
+    #cursor {
+      width: 9px; height: 9px;
+      background: var(--accent); border-radius: 50%;
+      position: fixed; top: 0; left: 0;
+      pointer-events: none; z-index: 9999;
+      transform: translate(-50%,-50%);
+    }
+    #cursor-ring {
+      width: 32px; height: 32px;
+      border: 1.5px solid var(--accent); border-radius: 50%;
+      position: fixed; top: 0; left: 0;
+      pointer-events: none; z-index: 9998;
+      transform: translate(-50%,-50%);
+      transition: all .16s ease; opacity: .45;
+    }
+    body:has(a:hover) #cursor-ring,
+    body:has(button:hover) #cursor-ring { width: 46px; height: 46px; border-color: var(--accent3); opacity: .9; }
+
+    /* ─── NOISE ─── */
+    body::after {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+      pointer-events: none; z-index: 999; opacity: .5;
+    }
+
+    /* ─── TOP NAV ─── */
+    .topnav {
+      position: fixed; top: 0; left: 0; right: 0;
+      height: var(--nav-h); z-index: 200;
+      background: rgba(10,10,15,.92);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center;
+      padding: 0 24px; gap: 0;
+      animation: slideDown .5s ease both;
+    }
+    @keyframes slideDown { from{transform:translateY(-100%);opacity:0} to{transform:translateY(0);opacity:1} }
+
+    .topnav-logo {
+      font-family: 'Bebas Neue', sans-serif; font-size: 24px;
+      letter-spacing: 3px; color: var(--accent); text-decoration: none;
+      margin-right: 24px; flex-shrink: 0;
+    }
+    .topnav-logo span { color: var(--text); }
+
+    .topnav-divider { width: 1px; height: 28px; background: var(--border); margin-right: 20px; flex-shrink: 0; }
+
+    .topnav-version {
+      font-family: 'Space Mono', monospace; font-size: 11px;
+      color: var(--muted); margin-right: 20px; flex-shrink: 0;
+      background: var(--card); border: 1px solid var(--border);
+      padding: 3px 8px; border-radius: 4px; letter-spacing: .5px;
+    }
+
+    /* ─── SEARCH BAR ─── */
+    .topnav-search {
+      flex: 1; max-width: 400px; position: relative;
+    }
+    .search-icon {
+      position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+      color: var(--muted); pointer-events: none;
+    }
+    .search-input {
+      width: 100%; padding: 8px 36px 8px 36px;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 8px; color: var(--text);
+      font-family: 'DM Sans', sans-serif; font-size: 13px;
+      outline: none; transition: all .3s; cursor: text;
+    }
+    .search-input::placeholder { color: var(--muted); }
+    .search-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(232,255,71,.07); }
+    .search-kbd {
+      position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+      font-family: 'Space Mono', monospace; font-size: 9px; color: var(--muted);
+      background: var(--surface); border: 1px solid var(--border);
+      padding: 2px 5px; border-radius: 4px; letter-spacing: .5px;
+    }
+
+    /* ─── SEARCH DROPDOWN ─── */
+    .search-dropdown {
+      position: absolute; top: calc(100% + 8px); left: 0; right: 0;
+      background: var(--card); border: 1px solid var(--border2);
+      border-radius: 12px; overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0,0,0,.6);
+      display: none; z-index: 300;
+      animation: dropIn .2s ease both;
+    }
+    @keyframes dropIn { from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:translateY(0)} }
+    .search-dropdown.show { display: block; }
+    .search-result {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 16px; border-bottom: 1px solid var(--border);
+      cursor: none; transition: background .2s;
+    }
+    .search-result:last-child { border-bottom: none; }
+    .search-result:hover { background: rgba(232,255,71,.04); }
+    .sr-icon { font-size: 14px; flex-shrink: 0; }
+    .sr-title { font-size: 13px; font-weight: 500; }
+    .sr-path { font-size: 11px; color: var(--muted); font-family: 'Space Mono', monospace; margin-top: 1px; }
+    .sr-tag {
+      margin-left: auto; font-size: 10px; padding: 2px 7px;
+      border-radius: 4px; font-family: 'Space Mono', monospace; letter-spacing: .5px; flex-shrink: 0;
+    }
+    .sr-tag.guide { background: rgba(232,255,71,.1); color: var(--accent); }
+    .sr-tag.api { background: rgba(0,210,255,.1); color: var(--accent3); }
+    .sr-tag.ref { background: rgba(168,85,247,.1); color: var(--accent4); }
+
+    .topnav-links { display: flex; gap: 4px; margin-left: auto; }
+    .tnl {
+      padding: 7px 14px; font-size: 13px; color: var(--muted);
+      text-decoration: none; border-radius: 6px; transition: all .2s;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .tnl:hover { color: var(--text); background: rgba(255,255,255,.04); }
+    .tnl.active { color: var(--accent); }
+    .tnl-cta {
+      padding: 7px 16px; background: var(--accent); color: #0a0a0f;
+      font-weight: 700; font-size: 13px; border-radius: 6px;
+      text-decoration: none; transition: all .25s; display: flex; align-items: center; gap: 5px;
+    }
+    .tnl-cta:hover { transform: translateY(-1px); box-shadow: 0 6px 20px var(--glow); }
+
+    .topnav-hamburger {
+      display: none; background: none; border: none; color: var(--text);
+      cursor: none; padding: 6px; margin-left: 12px;
+    }
+
+    /* ─── LAYOUT ─── */
+    .docs-layout {
+      display: flex;
+      padding-top: var(--nav-h);
+      min-height: 100vh;
+    }
+
+    /* ─── LEFT SIDEBAR ─── */
+    .sidebar {
+      width: var(--sidebar-w); flex-shrink: 0;
+      position: fixed; top: var(--nav-h); bottom: 0; left: 0;
+      overflow-y: auto; overflow-x: hidden;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      padding: 24px 0 60px;
+      transition: transform .3s ease;
+    }
+    .sidebar::-webkit-scrollbar { width: 4px; }
+    .sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    .sidebar-section { margin-bottom: 8px; }
+    .sidebar-group-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+      color: var(--muted); padding: 12px 20px 6px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .sidebar-group-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+    .sidebar-link {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 20px; font-size: 13px; color: var(--muted2);
+      text-decoration: none; transition: all .2s; cursor: none;
+      border-left: 2px solid transparent; position: relative;
+    }
+    .sidebar-link:hover { color: var(--text); background: rgba(255,255,255,.03); }
+    .sidebar-link.active {
+      color: var(--accent); background: rgba(232,255,71,.05);
+      border-left-color: var(--accent);
+    }
+    .sidebar-link .sl-icon { font-size: 14px; flex-shrink: 0; width: 18px; text-align: center; }
+    .sidebar-link .sl-badge {
+      margin-left: auto; font-size: 9px; padding: 1px 6px;
+      border-radius: 3px; font-family: 'Space Mono', monospace; letter-spacing: .5px;
+    }
+    .badge-new { background: rgba(232,255,71,.12); color: var(--accent); }
+    .badge-beta { background: rgba(0,210,255,.12); color: var(--accent3); }
+    .badge-dep { background: rgba(255,71,87,.1); color: var(--accent2); }
+
+    .sidebar-sub { padding-left: 16px; }
+    .sidebar-sub .sidebar-link { font-size: 12px; padding: 6px 20px 6px 28px; }
+    .sidebar-sub .sidebar-link::before { content: '·'; position: absolute; left: 20px; color: var(--muted); }
+
+    /* ─── MAIN CONTENT ─── */
+    .docs-main {
+      margin-left: var(--sidebar-w);
+      margin-right: var(--toc-w);
+      flex: 1;
+      min-width: 0;
+      padding: 48px 56px 100px;
+    }
+
+    /* ─── BREADCRUMB ─── */
+    .breadcrumb {
+      display: flex; align-items: center; gap: 8px;
+      font-family: 'Space Mono', monospace; font-size: 11px;
+      color: var(--muted); margin-bottom: 28px;
+      animation: fadeUp .4s ease both;
+    }
+    .breadcrumb span { color: var(--muted); }
+    .breadcrumb a { color: var(--muted2); text-decoration: none; transition: color .2s; }
+    .breadcrumb a:hover { color: var(--accent); }
+    .bc-sep { opacity: .4; }
+
+    /* ─── DOC HEADER ─── */
+    .doc-header {
+      margin-bottom: 40px;
+      animation: fadeUp .4s .05s ease both;
+    }
+    .doc-tag {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 4px 12px; border: 1px solid rgba(0,210,255,.25);
+      border-radius: 100px; font-size: 10px; letter-spacing: 2px;
+      text-transform: uppercase; color: var(--accent3);
+      background: rgba(0,210,255,.04); margin-bottom: 16px;
+      font-family: 'Space Mono', monospace;
+    }
+    .doc-tag .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent3); animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1}50%{opacity:.4} }
+
+    .doc-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(40px, 5vw, 68px);
+      line-height: .95; letter-spacing: 1px; margin-bottom: 16px;
+    }
+    .doc-title em { font-style: normal; color: var(--accent); }
+
+    .doc-meta {
+      display: flex; align-items: center; gap: 20px; flex-wrap: wrap;
+      font-size: 12px; color: var(--muted); font-family: 'Space Mono', monospace;
+      margin-bottom: 20px;
+    }
+    .doc-meta-item { display: flex; align-items: center; gap: 6px; }
+
+    .doc-desc { font-size: 16px; color: var(--muted2); line-height: 1.75; max-width: 720px; }
+
+    /* ─── QUICK ACTIONS ─── */
+    .quick-actions {
+      display: flex; gap: 10px; flex-wrap: wrap; margin: 28px 0 40px;
+      animation: fadeUp .4s .1s ease both;
+    }
+    .qa-btn {
+      display: flex; align-items: center; gap: 8px;
+      padding: 10px 18px; border-radius: 8px; font-size: 13px; font-weight: 500;
+      border: 1px solid var(--border); background: var(--card);
+      color: var(--text); cursor: none; transition: all .25s; text-decoration: none;
+    }
+    .qa-btn:hover { border-color: var(--accent); color: var(--accent); background: rgba(232,255,71,.04); transform: translateY(-1px); }
+    .qa-btn.primary { background: var(--accent); color: #0a0a0f; border-color: var(--accent); }
+    .qa-btn.primary:hover { box-shadow: 0 8px 24px var(--glow); color: #0a0a0f; }
+
+    /* ─── DIVIDER ─── */
+    .doc-divider { height: 1px; background: var(--border); margin: 40px 0; }
+
+    /* ─── PROSE ─── */
+    .doc-content { animation: fadeUp .4s .15s ease both; }
+
+    .doc-content h2 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 32px; letter-spacing: 1.5px;
+      margin: 48px 0 16px; color: var(--text);
+      display: flex; align-items: center; gap: 10px;
+    }
+    .doc-content h2 .anchor {
+      font-size: 16px; color: var(--muted); opacity: 0;
+      transition: opacity .2s; text-decoration: none;
+    }
+    .doc-content h2:hover .anchor { opacity: 1; }
+    .doc-content h2 em { font-style: normal; color: var(--accent); }
+
+    .doc-content h3 {
+      font-family: 'DM Sans', sans-serif; font-size: 18px; font-weight: 700;
+      margin: 32px 0 12px; color: var(--text);
+    }
+    .doc-content h4 {
+      font-family: 'Space Mono', monospace; font-size: 12px;
+      letter-spacing: 2px; text-transform: uppercase; color: var(--muted);
+      margin: 24px 0 10px;
+    }
+
+    .doc-content p { font-size: 15px; color: var(--muted2); line-height: 1.8; margin-bottom: 18px; }
+    .doc-content p strong { color: var(--text); font-weight: 600; }
+    .doc-content p a { color: var(--accent); text-decoration: none; border-bottom: 1px solid rgba(232,255,71,.3); transition: border-color .2s; }
+    .doc-content p a:hover { border-color: var(--accent); }
+
+    .doc-content ul, .doc-content ol {
+      margin: 0 0 18px 20px; color: var(--muted2); font-size: 15px; line-height: 1.8;
+    }
+    .doc-content li { margin-bottom: 6px; }
+    .doc-content li strong { color: var(--text); }
+
+    /* ─── INLINE CODE ─── */
+    .doc-content code {
+      font-family: 'Space Mono', monospace; font-size: 12px;
+      background: rgba(232,255,71,.08); color: var(--accent);
+      padding: 2px 7px; border-radius: 4px;
+      border: 1px solid rgba(232,255,71,.12);
+    }
+
+    /* ─── CODE BLOCK ─── */
+    .code-block {
+      margin: 24px 0; border-radius: 14px; overflow: hidden;
+      border: 1px solid var(--border2);
+      background: #0d0d14;
+    }
+    .code-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 18px;
+      background: rgba(255,255,255,.03);
+      border-bottom: 1px solid var(--border);
+    }
+    .code-lang {
+      font-family: 'Space Mono', monospace; font-size: 10px;
+      letter-spacing: 2px; text-transform: uppercase; color: var(--muted);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .code-dots { display: flex; gap: 5px; }
+    .cd { width: 10px; height: 10px; border-radius: 50%; }
+    .cd1 { background: #ff5f57; } .cd2 { background: #febc2e; } .cd3 { background: #28c840; }
+
+    .copy-btn {
+      font-family: 'Space Mono', monospace; font-size: 10px;
+      letter-spacing: 1px; text-transform: uppercase; color: var(--muted);
+      background: none; border: 1px solid var(--border); border-radius: 5px;
+      padding: 4px 10px; cursor: none; transition: all .2s;
+      display: flex; align-items: center; gap: 5px;
+    }
+    .copy-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .copy-btn.copied { color: var(--success); border-color: rgba(0,255,136,.3); }
+
+    pre {
+      padding: 22px 22px; overflow-x: auto; margin: 0;
+      font-family: 'Space Mono', monospace; font-size: 13px; line-height: 1.7;
+    }
+    pre::-webkit-scrollbar { height: 4px; }
+    pre::-webkit-scrollbar-thumb { background: var(--border); }
+
+    /* syntax colors */
+    .kw  { color: #ff79c6; }  /* keyword */
+    .fn  { color: #50fa7b; }  /* function */
+    .str { color: #f1fa8c; }  /* string */
+    .num { color: #bd93f9; }  /* number */
+    .cm  { color: #6272a4; font-style:italic; }  /* comment */
+    .var { color: #8be9fd; }  /* variable */
+    .pr  { color: #ffb86c; }  /* property */
+    .op  { color: #ff5555; }  /* operator */
+    .tx  { color: #f8f8f2; }  /* plain text */
+    .acc { color: var(--accent); }  /* accent highlight */
+
+    /* ─── CALLOUT BOXES ─── */
+    .callout {
+      display: flex; gap: 14px; padding: 18px 20px;
+      border-radius: 10px; margin: 24px 0; font-size: 14px; line-height: 1.65;
+    }
+    .callout-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+    .callout-body strong { display: block; font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+    .callout-body p { margin: 0; }
+    .callout.info { background: rgba(0,210,255,.07); border: 1px solid rgba(0,210,255,.2); color: var(--muted2); }
+    .callout.info .callout-body strong { color: var(--accent3); }
+    .callout.warning { background: rgba(255,165,0,.07); border: 1px solid rgba(255,165,0,.2); color: var(--muted2); }
+    .callout.warning .callout-body strong { color: var(--warning); }
+    .callout.tip { background: rgba(232,255,71,.06); border: 1px solid rgba(232,255,71,.2); color: var(--muted2); }
+    .callout.tip .callout-body strong { color: var(--accent); }
+    .callout.danger { background: rgba(255,71,87,.07); border: 1px solid rgba(255,71,87,.2); color: var(--muted2); }
+    .callout.danger .callout-body strong { color: var(--accent2); }
+
+    /* ─── PARAMETER TABLE ─── */
+    .param-table {
+      width: 100%; border-collapse: collapse;
+      margin: 20px 0; font-size: 13px;
+    }
+    .param-table th {
+      font-family: 'Space Mono', monospace; font-size: 10px;
+      letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted);
+      padding: 10px 14px; text-align: left;
+      border-bottom: 1px solid var(--border2);
+      background: rgba(255,255,255,.02);
+    }
+    .param-table td {
+      padding: 12px 14px; border-bottom: 1px solid var(--border);
+      vertical-align: top; color: var(--muted2); line-height: 1.5;
+    }
+    .param-table tr:last-child td { border-bottom: none; }
+    .param-table tr:hover td { background: rgba(255,255,255,.02); }
+    .param-name { color: var(--accent3); font-family: 'Space Mono', monospace; font-size: 12px; }
+    .param-type {
+      color: var(--accent4); font-family: 'Space Mono', monospace; font-size: 11px;
+      background: rgba(168,85,247,.08); padding: 2px 7px; border-radius: 4px;
+      border: 1px solid rgba(168,85,247,.15);
+    }
+    .param-req {
+      color: var(--accent2); font-family: 'Space Mono', monospace; font-size: 10px;
+      background: rgba(255,71,87,.08); padding: 2px 6px; border-radius: 4px;
+      border: 1px solid rgba(255,71,87,.15);
+    }
+    .param-opt {
+      color: var(--muted); font-family: 'Space Mono', monospace; font-size: 10px;
+      background: rgba(255,255,255,.04); padding: 2px 6px; border-radius: 4px;
+      border: 1px solid var(--border);
+    }
+
+    /* ─── TABS (code language switcher) ─── */
+    .code-tabs { display: flex; gap: 2px; margin-bottom: -1px; position: relative; z-index: 1; }
+    .ctab {
+      padding: 8px 16px; font-family: 'Space Mono', monospace;
+      font-size: 11px; letter-spacing: .5px; color: var(--muted);
+      background: var(--card); border: 1px solid var(--border);
+      border-bottom: none; border-radius: 8px 8px 0 0;
+      cursor: none; transition: all .2s;
+    }
+    .ctab.active { background: #0d0d14; color: var(--accent); border-color: var(--border2); }
+    .ctab:not(.active):hover { color: var(--text); }
+    .code-tab-panel { display: none; }
+    .code-tab-panel.active { display: block; }
+
+    /* ─── STEP LIST ─── */
+    .step-list { counter-reset: steps; list-style: none; margin: 0 0 24px; padding: 0; }
+    .step-list li {
+      counter-increment: steps;
+      display: flex; gap: 16px; margin-bottom: 20px; position: relative;
+    }
+    .step-list li::before {
+      content: counter(steps);
+      width: 28px; height: 28px; min-width: 28px; border-radius: 50%;
+      background: rgba(232,255,71,.1); border: 1.5px solid rgba(232,255,71,.3);
+      color: var(--accent); font-family: 'Bebas Neue', sans-serif;
+      font-size: 14px; letter-spacing: 1px;
+      display: flex; align-items: center; justify-content: center;
+      margin-top: 2px;
+    }
+    .step-list li::after {
+      content: ''; position: absolute;
+      left: 14px; top: 32px; bottom: -8px; width: 1px;
+      background: linear-gradient(var(--border), transparent);
+    }
+    .step-list li:last-child::after { display: none; }
+    .step-body { flex: 1; }
+    .step-body strong { display: block; font-size: 15px; font-weight: 600; margin-bottom: 5px; }
+    .step-body p { font-size: 14px; color: var(--muted2); line-height: 1.65; margin: 0; }
+
+    /* ─── API ENDPOINT CARD ─── */
+    .endpoint-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; margin: 20px 0; overflow: hidden;
+      transition: border-color .3s;
+    }
+    .endpoint-card:hover { border-color: var(--border2); }
+    .endpoint-header {
+      display: flex; align-items: center; gap: 12px;
+      padding: 14px 18px; border-bottom: 1px solid var(--border);
+      cursor: none;
+    }
+    .method-badge {
+      font-family: 'Space Mono', monospace; font-size: 11px; font-weight: 700;
+      padding: 3px 9px; border-radius: 5px; letter-spacing: .5px; flex-shrink: 0;
+    }
+    .method-get { background: rgba(0,255,136,.1); color: var(--success); border: 1px solid rgba(0,255,136,.2); }
+    .method-post { background: rgba(0,210,255,.1); color: var(--accent3); border: 1px solid rgba(0,210,255,.2); }
+    .method-put { background: rgba(255,165,0,.1); color: var(--warning); border: 1px solid rgba(255,165,0,.2); }
+    .method-delete { background: rgba(255,71,87,.1); color: var(--accent2); border: 1px solid rgba(255,71,87,.2); }
+    .endpoint-path {
+      font-family: 'Space Mono', monospace; font-size: 13px; color: var(--text); flex: 1;
+    }
+    .endpoint-path .ep-param { color: var(--accent4); }
+    .endpoint-desc { font-size: 12px; color: var(--muted); margin-left: auto; }
+    .endpoint-body { padding: 16px 18px; font-size: 13px; color: var(--muted2); line-height: 1.6; }
+
+    /* ─── FEATURE GRID ─── */
+    .feature-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 14px; margin: 24px 0;
+    }
+    .feat-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 20px; transition: all .3s; cursor: none;
+      text-decoration: none; display: block;
+    }
+    .feat-card:hover { border-color: rgba(232,255,71,.2); transform: translateY(-3px); background: rgba(232,255,71,.02); }
+    .feat-card-icon { font-size: 22px; margin-bottom: 10px; }
+    .feat-card-title { font-size: 14px; font-weight: 600; margin-bottom: 5px; color: var(--text); }
+    .feat-card-desc { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+    /* ─── NEXT / PREV ─── */
+    .doc-nav-footer {
+      display: flex; gap: 16px; margin-top: 60px; padding-top: 32px;
+      border-top: 1px solid var(--border);
+    }
+    .doc-nav-btn {
+      flex: 1; padding: 18px 22px;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; cursor: none; transition: all .3s;
+      text-decoration: none; display: flex; flex-direction: column; gap: 4px;
+    }
+    .doc-nav-btn:hover { border-color: var(--accent); background: rgba(232,255,71,.03); }
+    .doc-nav-btn.next { text-align: right; }
+    .dnb-label { font-size: 11px; color: var(--muted); font-family: 'Space Mono', monospace; letter-spacing: 1px; text-transform: uppercase; }
+    .dnb-title { font-size: 14px; font-weight: 600; color: var(--text); display: flex; align-items: center; gap: 6px; }
+    .doc-nav-btn.next .dnb-title { justify-content: flex-end; }
+
+    /* ─── RIGHT TOC ─── */
+    .toc {
+      width: var(--toc-w); flex-shrink: 0;
+      position: fixed; top: var(--nav-h); right: 0; bottom: 0;
+      overflow-y: auto; padding: 32px 20px 60px;
+      border-left: 1px solid var(--border);
+    }
+    .toc::-webkit-scrollbar { width: 3px; }
+    .toc::-webkit-scrollbar-thumb { background: var(--border); }
+
+    .toc-label {
+      font-family: 'Space Mono', monospace; font-size: 10px;
+      letter-spacing: 2px; text-transform: uppercase; color: var(--muted);
+      margin-bottom: 14px; display: flex; align-items: center; gap: 8px;
+    }
+    .toc-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+    .toc-link {
+      display: block; padding: 5px 0 5px 12px;
+      font-size: 12px; color: var(--muted); text-decoration: none;
+      border-left: 1.5px solid var(--border);
+      transition: all .2s; line-height: 1.4; cursor: none;
+    }
+    .toc-link:hover { color: var(--text); border-left-color: rgba(255,255,255,.25); }
+    .toc-link.active { color: var(--accent); border-left-color: var(--accent); }
+    .toc-link.sub { padding-left: 22px; font-size: 11px; }
+
+    .toc-divider { height: 1px; background: var(--border); margin: 16px 0; }
+
+    .toc-actions { display: flex; flex-direction: column; gap: 8px; }
+    .toc-action {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 12px; color: var(--muted); text-decoration: none;
+      padding: 6px 8px; border-radius: 6px; transition: all .2s; cursor: none;
+    }
+    .toc-action:hover { color: var(--text); background: rgba(255,255,255,.04); }
+
+    /* ─── FEEDBACK ─── */
+    .feedback-bar {
+      margin-top: 40px; padding: 20px 22px;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+    }
+    .fb-text { font-size: 13px; color: var(--muted); }
+    .fb-text strong { color: var(--text); }
+    .fb-btns { display: flex; gap: 8px; margin-left: auto; }
+    .fb-btn {
+      padding: 7px 16px; border-radius: 7px; font-size: 12px;
+      border: 1px solid var(--border); background: transparent;
+      color: var(--muted); cursor: none; transition: all .2s;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .fb-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .fb-btn.yes:hover { border-color: var(--success); color: var(--success); }
+
+    /* ─── TOAST ─── */
+    #toast {
+      position: fixed; bottom: 24px; right: 24px; z-index: 9999;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 10px; padding: 12px 18px;
+      display: flex; align-items: center; gap: 9px; font-size: 13px;
+      transform: translateY(70px); opacity: 0;
+      transition: all .35s cubic-bezier(.16,1,.3,1); pointer-events: none;
+    }
+    #toast.show { transform: translateY(0); opacity: 1; }
+    .tdot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); animation: pulse 1.5s infinite; }
+    #toast.ok .tdot { background: var(--success); }
+    #toast.ok { border-color: rgba(0,255,136,.25); }
+
+    @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+
+    /* ─── MOBILE ─── */
+    @media(max-width:1100px) {
+      .toc { display: none; }
+      .docs-main { margin-right: 0; }
+    }
+    @media(max-width:768px) {
+      .sidebar { transform: translateX(-100%); z-index: 150; }
+      .sidebar.open { transform: translateX(0); }
+      .docs-main { margin-left: 0; padding: 32px 20px 80px; }
+      .topnav-links { display: none; }
+      .topnav-hamburger { display: flex; }
+      body { cursor: auto; }
+      #cursor, #cursor-ring { display: none; }
+      .doc-nav-footer { flex-direction: column; }
+      .field-grid { grid-template-columns: 1fr; }
+      .topnav-search { max-width: 200px; }
+    }
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  </style>
+</head>
+<body>
+
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+<div id="toast"><div class="tdot"></div><span id="toast-msg">Copied!</span></div>
+
+<!-- ═══ TOP NAV ═══ -->
+<nav class="topnav">
+  <a href="homepage.html" class="topnav-logo">E<span>U</span>P</a>
+  <div class="topnav-divider"></div>
+  <span class="topnav-version">v2.4.1</span>
+
+  <div class="topnav-search">
+    <span class="search-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></span>
+    <input type="text" class="search-input" id="searchInput" placeholder="Search documentation..." autocomplete="off"
+      oninput="handleSearch(this.value)" onfocus="handleSearch(this.value)" onblur="setTimeout(()=>closeSearch(),200)"/>
+    <span class="search-kbd">⌘K</span>
+    <div class="search-dropdown" id="searchDropdown">
+      <div class="search-result" onclick="navigate('intro')">
+        <span class="sr-icon">🚀</span>
+        <div><div class="sr-title">Getting Started</div><div class="sr-path">docs / introduction</div></div>
+        <span class="sr-tag guide">Guide</span>
+      </div>
+      <div class="search-result" onclick="navigate('authentication')">
+        <span class="sr-icon">🔐</span>
+        <div><div class="sr-title">Authentication & API Keys</div><div class="sr-path">docs / api / authentication</div></div>
+        <span class="sr-tag api">API</span>
+      </div>
+      <div class="search-result" onclick="navigate('builder')">
+        <span class="sr-icon">⚡</span>
+        <div><div class="sr-title">Prompt Builder Reference</div><div class="sr-path">docs / core / prompt-builder</div></div>
+        <span class="sr-tag ref">Reference</span>
+      </div>
+      <div class="search-result" onclick="navigate('webhooks')">
+        <span class="sr-icon">🪝</span>
+        <div><div class="sr-title">Webhooks</div><div class="sr-path">docs / api / webhooks</div></div>
+        <span class="sr-tag api">API</span>
+      </div>
+      <div class="search-result" onclick="navigate('sdks')">
+        <span class="sr-icon">📦</span>
+        <div><div class="sr-title">SDKs & Libraries</div><div class="sr-path">docs / sdks</div></div>
+        <span class="sr-tag guide">Guide</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="topnav-links">
+    <a href="homepage.html" class="tnl">Home</a>
+    <a href="bookademo.html" class="tnl">Contact</a>
+    <a href="docspage.html" class="tnl active">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+      Docs
+    </a>
+    <a href="loginpage.html" class="tnl">Log In</a>
+    <a href="signuppage.html" class="tnl-cta">Get Started →</a>
+  </div>
+  <button class="topnav-hamburger" onclick="toggleSidebar()">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+  </button>
+</nav>
+
+<!-- ═══ DOCS LAYOUT ═══ -->
+<div class="docs-layout">
+
+  <!-- ═══ LEFT SIDEBAR ═══ -->
+  <aside class="sidebar" id="sidebar">
+
+    <div class="sidebar-section">
+      <div class="sidebar-group-label">Overview</div>
+      <a href="#intro" class="sidebar-link active" onclick="setActive(this)">
+        <span class="sl-icon">🏠</span> Introduction
+      </a>
+      <a href="#quickstart" class="sidebar-link" onclick="setActive(this)">
+        <span class="sl-icon">⚡</span> Quick Start
+        <span class="sl-badge badge-new">NEW</span>
+      </a>
+      <a href="#concepts" class="sidebar-link" onclick="setActive(this)">
+        <span class="sl-icon">🧠</span> Core Concepts
+      </a>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-group-label">Guides</div>
+      <a href="#builder" class="sidebar-link" onclick="setActive(this)">
+        <span class="sl-icon">🏗️</span> Prompt Builder
+      </a>
+      <div class="sidebar-sub">
+        <a href="#builder" class="sidebar-link" onclick="setActive(this)">Variables</a>
+        <a href="#builder" class="sidebar-link" onclick="setActive(this)">Conditionals</a>
+        <a href="#builder" class="sidebar-link" onclick="setActive(this)">Templates</a>
+      </div>
+      <a href="#library" class="sidebar-link" onclick="setActive(this)">
+        <span class="sl-icon">📚</span> Prompt Library
+      </a>
+      <a href="#testing" class="sidebar-link" onclick="setActive(this)">
+        <span class="sl-icon">🧪</span> Testing & Preview
+        <span class="sl-badge badge-beta">BETA</span>
+      </a>
+      <a href="#collaboration" class="sidebar-link" onclick="setActive(this)">
+        <span class="sl-icon">🤝</span> Collaboration
+      </a>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-group-label">API Reference</div>
+      <a href="#authentication" class="sidebar-link" onclick="setActive(this)">
+        <span class="sl-icon">🔐</span> Authentication
+      </a>
+      <a href="#endpoints" class="sidebar-link" onclick="setActive(this)">
+        <span class="sl-icon">🔗</span> Endpoints
+      </a>
+      <div class="sidebar-sub">
+        <a href="#endpoints" class="sidebar-link" onclick="setActive(this)">Prompts</a>
+        <a href="#endpoints" class="sidebar-link" onclick="setActive(this)">Templates</a>
+        <a href="#endpoints" class="sidebar-link" onclick="setActive(this)">Analytics</a>
+      </div>
+      <a href="#webhooks" class="sidebar-link" onclick="setActive(this)">
+        <span class="sl-icon">🪝</span> Webhooks
+      </a>
+      <a href="#rate-limits" class="sidebar-link" onclick="setActive(this)">
+        <span class="sl-icon">⏱️</span> Rate Limits
+      </a>
+      <a href="#errors" class="sidebar-link" onclick="setActive(this)">
+        <span class="sl-icon">⚠️</span> Error Codes
+        <span class="sl-badge badge-dep">v2</span>
+      </a>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-group-label">SDKs</div>
+      <a href="#sdks" class="sidebar-link" onclick="setActive(this)">
+        <span class="sl-icon">📦</span> JavaScript / Node
+      </a>
+      <a href="#sdks" class="sidebar-link" onclick="setActive(this)">
+        <span class="sl-icon">🐍</span> Python
+      </a>
+      <a href="#sdks" class="sidebar-link" onclick="setActive(this)">
+        <span class="sl-icon">☕</span> Java
+        <span class="sl-badge badge-beta">BETA</span>
+      </a>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-group-label">Resources</div>
+      <a href="#changelog" class="sidebar-link" onclick="setActive(this)">
+        <span class="sl-icon">📋</span> Changelog
+      </a>
+      <a href="bookademo.html" class="sidebar-link">
+        <span class="sl-icon">🆘</span> Support
+      </a>
+      <a href="https://github.com/eup-io" class="sidebar-link" target="_blank" rel="noopener noreferrer" onclick="toast('Opening GitHub...')">
+        <span class="sl-icon">🐙</span> GitHub
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-left:auto;opacity:.4"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+      </a>
+    </div>
+
+  </aside>
+
+  <!-- ═══ MAIN CONTENT ═══ -->
+  <main class="docs-main" id="docsMain">
+
+    <!-- BREADCRUMB -->
+    <div class="breadcrumb">
+      <a href="homepage.html">EUP</a>
+      <span class="bc-sep">/</span>
+      <a href="docspage.html">Docs</a>
+      <span class="bc-sep">/</span>
+      <span>Introduction</span>
+    </div>
+
+    <!-- DOC HEADER -->
+    <div class="doc-header" id="intro">
+      <div class="doc-tag"><span class="dot"></span> Getting Started</div>
+      <h1 class="doc-title">EUP <em>DOCUMENTATION</em></h1>
+      <div class="doc-meta">
+        <div class="doc-meta-item">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          Last updated Mar 7, 2026
+        </div>
+        <div class="doc-meta-item">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+          ~12 min read
+        </div>
+        <div class="doc-meta-item">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+          v2.4.1
+        </div>
+      </div>
+      <p class="doc-desc">Welcome to the EUP developer documentation. This guide covers everything you need to integrate EUP into your product, automate prompt workflows, and build AI-powered experiences with precision.</p>
+    </div>
+
+    <!-- QUICK ACTIONS -->
+    <div class="quick-actions">
+      <a href="#quickstart" class="qa-btn primary">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        Quick Start
+      </a>
+      <a href="#endpoints" class="qa-btn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        API Reference
+      </a>
+      <a href="#sdks" class="qa-btn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        SDKs
+      </a>
+      <a href="#changelog" class="qa-btn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Changelog
+      </a>
+    </div>
+
+    <div class="doc-divider"></div>
+
+    <!-- CONTENT -->
+    <div class="doc-content">
+
+      <!-- WHAT IS EUP -->
+      <h2 id="concepts">WHAT IS <em>EUP</em>? <a href="#concepts" class="anchor">§</a></h2>
+      <p>EUP (Excessive User Prompting) is a <strong>prompt engineering platform</strong> that eliminates trial-and-error when working with large language models. Instead of iterating endlessly on prompt phrasing, EUP gives you a structured, visual toolkit to build, test, version, and deploy prompts at scale.</p>
+
+      <div class="feature-grid">
+        <a href="#builder" class="feat-card" onclick="setActive(document.querySelector('[href=\'#builder\']'))">
+          <div class="feat-card-icon">⚡</div>
+          <div class="feat-card-title">Prompt Builder</div>
+          <div class="feat-card-desc">Visual drag-and-drop editor with variables, conditionals, and live preview.</div>
+        </a>
+        <a href="#library" class="feat-card">
+          <div class="feat-card-icon">📚</div>
+          <div class="feat-card-title">Prompt Library</div>
+          <div class="feat-card-desc">Thousands of community templates. Fork, version, publish.</div>
+        </a>
+        <a href="#endpoints" class="feat-card">
+          <div class="feat-card-icon">🔗</div>
+          <div class="feat-card-title">REST API</div>
+          <div class="feat-card-desc">Full API access to run, manage, and analyse prompts programmatically.</div>
+        </a>
+        <a href="#collaboration" class="feat-card">
+          <div class="feat-card-icon">🤝</div>
+          <div class="feat-card-title">Teams</div>
+          <div class="feat-card-desc">Role-based access, shared workspaces, version history.</div>
+        </a>
+      </div>
+
+      <!-- QUICK START -->
+      <h2 id="quickstart">QUICK <em>START</em> <a href="#quickstart" class="anchor">§</a></h2>
+      <p>Get up and running in under 5 minutes. You'll need an EUP account and an API key to follow along.</p>
+
+      <ol class="step-list">
+        <li>
+          <div class="step-body">
+            <strong>Create an account</strong>
+            <p>Sign up at <a href="signuppage.html">eup.io/signup</a> — the free tier includes 50 prompts per month with no credit card required.</p>
+          </div>
+        </li>
+        <li>
+          <div class="step-body">
+            <strong>Generate an API key</strong>
+            <p>Navigate to <strong>Settings → API Keys</strong> in your dashboard and click <code>Generate New Key</code>. Store it securely — it's shown only once.</p>
+          </div>
+        </li>
+        <li>
+          <div class="step-body">
+            <strong>Install the SDK</strong>
+            <p>Choose your preferred language below and install the official EUP client library.</p>
+          </div>
+        </li>
+        <li>
+          <div class="step-body">
+            <strong>Run your first prompt</strong>
+            <p>Use the example below to execute a prompt from your library via the API in seconds.</p>
+          </div>
+        </li>
+      </ol>
+
+      <!-- INSTALL TABS -->
+      <div class="code-tabs" id="installTabs">
+        <button class="ctab active" onclick="switchCodeTab('installTabs','install-js',this)">npm</button>
+        <button class="ctab" onclick="switchCodeTab('installTabs','install-py',this)">pip</button>
+        <button class="ctab" onclick="switchCodeTab('installTabs','install-yarn',this)">yarn</button>
+      </div>
+      <div class="code-block" style="border-radius:0 12px 12px 12px;">
+        <div class="code-header">
+          <div class="code-lang"><div class="code-dots"><div class="cd cd1"></div><div class="cd cd2"></div><div class="cd cd3"></div></div>terminal</div>
+          <button class="copy-btn" onclick="copyCode(this,'npm install @eup-io/client')">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            Copy
+          </button>
+        </div>
+        <div class="code-tab-panel active" id="install-js">
+          <pre><span class="cm"># Install via npm</span>
+<span class="fn">npm</span> <span class="kw">install</span> <span class="str">@eup-io/client</span></pre>
+        </div>
+        <div class="code-tab-panel" id="install-py">
+          <pre><span class="cm"># Install via pip</span>
+<span class="fn">pip</span> <span class="kw">install</span> <span class="str">eup-python</span></pre>
+        </div>
+        <div class="code-tab-panel" id="install-yarn">
+          <pre><span class="cm"># Install via yarn</span>
+<span class="fn">yarn</span> <span class="kw">add</span> <span class="str">@eup-io/client</span></pre>
+        </div>
+      </div>
+
+      <h3>Your First API Call</h3>
+      <div class="code-tabs" id="firstCallTabs">
+        <button class="ctab active" onclick="switchCodeTab('firstCallTabs','fc-js',this)">JavaScript</button>
+        <button class="ctab" onclick="switchCodeTab('firstCallTabs','fc-py',this)">Python</button>
+        <button class="ctab" onclick="switchCodeTab('firstCallTabs','fc-curl',this)">cURL</button>
+      </div>
+      <div class="code-block" style="border-radius:0 12px 12px 12px;">
+        <div class="code-header">
+          <div class="code-lang"><div class="code-dots"><div class="cd cd1"></div><div class="cd cd2"></div><div class="cd cd3"></div></div><span id="firstCallLang">javascript</span></div>
+          <button class="copy-btn" id="firstCallCopyBtn" onclick="copyCode(this, document.querySelector('#fc-js pre').innerText)">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            Copy
+          </button>
+        </div>
+        <div class="code-tab-panel active" id="fc-js">
+          <pre><span class="kw">import</span> <span class="tx">{ EUPClient }</span> <span class="kw">from</span> <span class="str">'@eup-io/client'</span><span class="tx">;</span>
+
+<span class="kw">const</span> <span class="var">eup</span> <span class="op">=</span> <span class="kw">new</span> <span class="fn">EUPClient</span><span class="tx">({</span>
+  <span class="pr">apiKey</span><span class="tx">:</span> <span class="str">'eup_live_xxxxxxxxxxxxxxxxxxxx'</span><span class="tx">,</span>
+<span class="tx">});</span>
+
+<span class="kw">const</span> <span class="var">result</span> <span class="op">=</span> <span class="kw">await</span> <span class="var">eup</span><span class="tx">.</span><span class="fn">prompts</span><span class="tx">.</span><span class="fn">run</span><span class="tx">({</span>
+  <span class="pr">promptId</span><span class="tx">:</span> <span class="str">'prompt_abc123'</span><span class="tx">,</span>
+  <span class="pr">variables</span><span class="tx">: {</span>
+    <span class="pr">topic</span><span class="tx">:</span> <span class="str">'prompt engineering'</span><span class="tx">,</span>
+    <span class="pr">tone</span><span class="tx">:</span>  <span class="str">'professional'</span><span class="tx">,</span>
+    <span class="pr">length</span><span class="tx">:</span> <span class="num">300</span><span class="tx">,</span>
+  <span class="tx">},</span>
+  <span class="pr">model</span><span class="tx">:</span> <span class="str">'gpt-4o'</span><span class="tx">,</span>
+<span class="tx">});</span>
+
+<span class="var">console</span><span class="tx">.</span><span class="fn">log</span><span class="tx">(</span><span class="var">result</span><span class="tx">.</span><span class="pr">output</span><span class="tx">);</span>
+<span class="cm">// → "Prompt engineering is the practice of..."</span></pre>
+        </div>
+        <div class="code-tab-panel" id="fc-py">
+          <pre><span class="kw">from</span> <span class="tx">eup</span> <span class="kw">import</span> <span class="fn">EUPClient</span>
+
+<span class="var">eup</span> <span class="op">=</span> <span class="fn">EUPClient</span><span class="tx">(</span><span class="pr">api_key</span><span class="op">=</span><span class="str">"eup_live_xxxxxxxxxxxxxxxxxxxx"</span><span class="tx">)</span>
+
+<span class="var">result</span> <span class="op">=</span> <span class="var">eup</span><span class="tx">.</span><span class="fn">prompts</span><span class="tx">.</span><span class="fn">run</span><span class="tx">(</span>
+  <span class="pr">prompt_id</span><span class="op">=</span><span class="str">"prompt_abc123"</span><span class="tx">,</span>
+  <span class="pr">variables</span><span class="op">=</span><span class="tx">{</span>
+    <span class="str">"topic"</span><span class="tx">:</span> <span class="str">"prompt engineering"</span><span class="tx">,</span>
+    <span class="str">"tone"</span><span class="tx">:</span>  <span class="str">"professional"</span><span class="tx">,</span>
+    <span class="str">"length"</span><span class="tx">:</span> <span class="num">300</span><span class="tx">,</span>
+  <span class="tx">},</span>
+  <span class="pr">model</span><span class="op">=</span><span class="str">"gpt-4o"</span><span class="tx">,</span>
+<span class="tx">)</span>
+
+<span class="fn">print</span><span class="tx">(</span><span class="var">result</span><span class="tx">.</span><span class="pr">output</span><span class="tx">)</span>
+<span class="cm"># → "Prompt engineering is the practice of..."</span></pre>
+        </div>
+        <div class="code-tab-panel" id="fc-curl">
+          <pre><span class="fn">curl</span> <span class="kw">-X POST</span> <span class="str">https://api.eup.io/v2/prompts/run</span> \
+  <span class="kw">-H</span> <span class="str">"Authorization: Bearer eup_live_xxxx"</span> \
+  <span class="kw">-H</span> <span class="str">"Content-Type: application/json"</span> \
+  <span class="kw">-d</span> <span class="str">'{
+    "promptId": "prompt_abc123",
+    "variables": {
+      "topic": "prompt engineering",
+      "tone": "professional",
+      "length": 300
+    },
+    "model": "gpt-4o"
+  }'</span></pre>
+        </div>
+      </div>
+
+      <div class="callout tip">
+        <span class="callout-icon">💡</span>
+        <div class="callout-body"><strong>Pro tip</strong><p>Use environment variables to store your API key. Never commit <code>eup_live_*</code> keys to version control. Use <code>eup_test_*</code> keys in development — they don't count against your quota.</p></div>
+      </div>
+
+      <!-- BUILDER -->
+      <h2 id="builder">PROMPT <em>BUILDER</em> <a href="#builder" class="anchor">§</a></h2>
+      <p>The Prompt Builder gives you a visual workflow for composing reusable prompts with variables, constraints, and output schemas. Every save creates a version so you can diff and roll back safely.</p>
+
+      <h4>Builder Workflow</h4>
+      <ol class="step-list">
+        <li>
+          <div class="step-body">
+            <strong>Define your intent and context</strong>
+            <p>Use a clear system block that states objective, audience, and non-negotiable constraints.</p>
+          </div>
+        </li>
+        <li>
+          <div class="step-body">
+            <strong>Insert variables</strong>
+            <p>Reference variables with <code>{{variable_name}}</code> syntax and provide validation rules in config.</p>
+          </div>
+        </li>
+        <li>
+          <div class="step-body">
+            <strong>Preview with sample inputs</strong>
+            <p>Run quick tests against multiple models before publishing to production environments.</p>
+          </div>
+        </li>
+      </ol>
+
+      <!-- LIBRARY -->
+      <h2 id="library">PROMPT <em>LIBRARY</em> <a href="#library" class="anchor">§</a></h2>
+      <p>The library stores team and personal templates with tags, ownership, and usage analytics. Fork community templates and adapt them to your own workflows in one click.</p>
+
+      <table class="param-table">
+        <thead><tr><th>Capability</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><span class="param-name">Version History</span></td><td>Track changes per prompt with timestamps and editor attribution.</td></tr>
+          <tr><td><span class="param-name">Collections</span></td><td>Group prompts by product area, team, or customer segment.</td></tr>
+          <tr><td><span class="param-name">Fork & Publish</span></td><td>Create internal variants or publish templates to your private catalog.</td></tr>
+        </tbody>
+      </table>
+
+      <!-- TESTING -->
+      <h2 id="testing">TESTING &amp; <em>PREVIEW</em> <a href="#testing" class="anchor">§</a></h2>
+      <p>Run side-by-side evaluations to compare output quality, latency, and token cost. Evaluation runs can be exported for QA review and release approvals.</p>
+
+      <div class="callout info">
+        <span class="callout-icon">ℹ️</span>
+        <div class="callout-body"><strong>Regression testing</strong><p>Store golden inputs and expected patterns, then re-run after any prompt or model change to catch output drift early.</p></div>
+      </div>
+
+      <!-- COLLABORATION -->
+      <h2 id="collaboration">TEAM <em>COLLABORATION</em> <a href="#collaboration" class="anchor">§</a></h2>
+      <p>Collaborate with role-based access controls, review comments, and shareable run snapshots. Workspace roles define who can view, edit, publish, and manage keys.</p>
+
+      <table class="param-table">
+        <thead><tr><th>Role</th><th>Permissions</th></tr></thead>
+        <tbody>
+          <tr><td><span class="param-name">Viewer</span></td><td>Read prompts, inspect runs, and export reports.</td></tr>
+          <tr><td><span class="param-name">Editor</span></td><td>Create and update prompts, run tests, and manage collections.</td></tr>
+          <tr><td><span class="param-name">Admin</span></td><td>Manage members, API keys, billing, and publication rules.</td></tr>
+        </tbody>
+      </table>
+
+      <!-- AUTHENTICATION -->
+      <h2 id="authentication">AUTHENTICATION <a href="#authentication" class="anchor">§</a></h2>
+      <p>EUP uses <strong>Bearer token authentication</strong> for all API requests. Include your API key in the <code>Authorization</code> header of every request.</p>
+
+      <div class="callout warning">
+        <span class="callout-icon">⚠️</span>
+        <div class="callout-body"><strong>Keep your keys secret</strong><p>API keys carry full account privileges. Rotate compromised keys immediately from the dashboard under Settings → API Keys → Revoke.</p></div>
+      </div>
+
+      <h4>Key Types</h4>
+      <table class="param-table">
+        <thead><tr><th>Key Prefix</th><th>Type</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><span class="param-name">eup_live_</span></td><td><span class="param-type">string</span></td><td>Production key. Counts against quota. Use in deployed apps.</td></tr>
+          <tr><td><span class="param-name">eup_test_</span></td><td><span class="param-type">string</span></td><td>Test key. Returns mock responses. Free for CI/CD pipelines.</td></tr>
+          <tr><td><span class="param-name">eup_team_</span></td><td><span class="param-type">string</span></td><td>Team-scoped key. Bound to workspace permissions only.</td></tr>
+        </tbody>
+      </table>
+
+      <!-- ENDPOINTS -->
+      <h2 id="endpoints">API <em>ENDPOINTS</em> <a href="#endpoints" class="anchor">§</a></h2>
+      <p>All endpoints are prefixed with <code>https://api.eup.io/v2</code>. Responses are always JSON. Errors follow the <a href="#errors">standard error format</a>.</p>
+
+      <div class="endpoint-card">
+        <div class="endpoint-header">
+          <span class="method-badge method-post">POST</span>
+          <span class="endpoint-path">/prompts/<span class="ep-param">{promptId}</span>/run</span>
+          <span class="endpoint-desc">Execute a prompt</span>
+        </div>
+        <div class="endpoint-body">Execute a saved prompt with variable substitution. Returns the model's generated output along with token usage and latency metadata.</div>
+      </div>
+
+      <div class="endpoint-card">
+        <div class="endpoint-header">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/prompts</span>
+          <span class="endpoint-desc">List all prompts</span>
+        </div>
+        <div class="endpoint-body">Returns a paginated list of all prompts in the authenticated workspace, sorted by last modified descending.</div>
+      </div>
+
+      <div class="endpoint-card">
+        <div class="endpoint-header">
+          <span class="method-badge method-post">POST</span>
+          <span class="endpoint-path">/prompts</span>
+          <span class="endpoint-desc">Create a prompt</span>
+        </div>
+        <div class="endpoint-body">Creates a new prompt in the workspace. Accepts a name, body template with <code>{{variable}}</code> syntax, and optional metadata tags.</div>
+      </div>
+
+      <div class="endpoint-card">
+        <div class="endpoint-header">
+          <span class="method-badge method-put">PUT</span>
+          <span class="endpoint-path">/prompts/<span class="ep-param">{promptId}</span></span>
+          <span class="endpoint-desc">Update a prompt</span>
+        </div>
+        <div class="endpoint-body">Updates an existing prompt. Creates a new version in the history automatically. Previous versions remain accessible via the versions endpoint.</div>
+      </div>
+
+      <div class="endpoint-card">
+        <div class="endpoint-header">
+          <span class="method-badge method-delete">DELETE</span>
+          <span class="endpoint-path">/prompts/<span class="ep-param">{promptId}</span></span>
+          <span class="endpoint-desc">Archive a prompt</span>
+        </div>
+        <div class="endpoint-body">Archives (soft-deletes) a prompt. Archived prompts are retained for 30 days and can be restored from the dashboard.</div>
+      </div>
+
+      <h3>Request Parameters — <code>/prompts/:id/run</code></h3>
+      <table class="param-table">
+        <thead><tr><th>Parameter</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><span class="param-name">promptId</span></td>
+            <td><span class="param-type">string</span></td>
+            <td><span class="param-req">required</span></td>
+            <td>The unique identifier of the prompt to run. Found on the prompt detail page.</td>
+          </tr>
+          <tr>
+            <td><span class="param-name">variables</span></td>
+            <td><span class="param-type">object</span></td>
+            <td><span class="param-opt">optional</span></td>
+            <td>Key-value map of variable names to values. Must match variables declared in the prompt template.</td>
+          </tr>
+          <tr>
+            <td><span class="param-name">model</span></td>
+            <td><span class="param-type">string</span></td>
+            <td><span class="param-opt">optional</span></td>
+            <td>Override the default model. Accepted: <code>gpt-4o</code>, <code>claude-3-5-sonnet</code>, <code>gemini-2.0-flash</code>.</td>
+          </tr>
+          <tr>
+            <td><span class="param-name">stream</span></td>
+            <td><span class="param-type">boolean</span></td>
+            <td><span class="param-opt">optional</span></td>
+            <td>When <code>true</code>, returns a streaming SSE response. Defaults to <code>false</code>.</td>
+          </tr>
+          <tr>
+            <td><span class="param-name">maxTokens</span></td>
+            <td><span class="param-type">integer</span></td>
+            <td><span class="param-opt">optional</span></td>
+            <td>Maximum output tokens. Overrides the prompt-level setting. Range: 1 – 32768.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- RESPONSE EXAMPLE -->
+      <h3>Response Example</h3>
+      <div class="code-block">
+        <div class="code-header">
+          <div class="code-lang"><div class="code-dots"><div class="cd cd1"></div><div class="cd cd2"></div><div class="cd cd3"></div></div>json</div>
+          <button class="copy-btn" onclick="copyCode(this, '{ response JSON }')">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            Copy
+          </button>
+        </div>
+        <pre><span class="tx">{</span>
+  <span class="pr">"id"</span><span class="tx">:</span>        <span class="str">"run_8fJ2kXpL9mNq"</span><span class="tx">,</span>
+  <span class="pr">"promptId"</span><span class="tx">:</span>  <span class="str">"prompt_abc123"</span><span class="tx">,</span>
+  <span class="pr">"status"</span><span class="tx">:</span>    <span class="str">"success"</span><span class="tx">,</span>
+  <span class="pr">"output"</span><span class="tx">:</span>    <span class="str">"Prompt engineering is the practice of..."</span><span class="tx">,</span>
+  <span class="pr">"model"</span><span class="tx">:</span>     <span class="str">"gpt-4o"</span><span class="tx">,</span>
+  <span class="pr">"usage"</span><span class="tx">: {</span>
+    <span class="pr">"inputTokens"</span><span class="tx">:</span>   <span class="num">142</span><span class="tx">,</span>
+    <span class="pr">"outputTokens"</span><span class="tx">:</span>  <span class="num">298</span><span class="tx">,</span>
+    <span class="pr">"totalTokens"</span><span class="tx">:</span>   <span class="num">440</span>
+  <span class="tx">},</span>
+  <span class="pr">"latencyMs"</span><span class="tx">:</span> <span class="num">1842</span><span class="tx">,</span>
+  <span class="pr">"createdAt"</span><span class="tx">:</span> <span class="str">"2026-03-07T10:22:01Z"</span>
+<span class="tx">}</span></pre>
+      </div>
+
+      <!-- RATE LIMITS -->
+      <h2 id="rate-limits">RATE <em>LIMITS</em> <a href="#rate-limits" class="anchor">§</a></h2>
+      <p>EUP enforces per-API-key rate limits to ensure stability for all users. Limits are applied on a <strong>sliding 60-second window</strong>.</p>
+
+      <table class="param-table">
+        <thead><tr><th>Plan</th><th>Requests / min</th><th>Tokens / day</th><th>Concurrent</th></tr></thead>
+        <tbody>
+          <tr><td>Free</td><td><span class="param-name">60</span></td><td><span class="param-name">100K</span></td><td><span class="param-name">5</span></td></tr>
+          <tr><td>Pro</td><td><span class="param-name">600</span></td><td><span class="param-name">5M</span></td><td><span class="param-name">50</span></td></tr>
+          <tr><td>Enterprise</td><td><span class="param-name">Custom</span></td><td><span class="param-name">Unlimited</span></td><td><span class="param-name">Unlimited</span></td></tr>
+        </tbody>
+      </table>
+
+      <div class="callout info">
+        <span class="callout-icon">ℹ️</span>
+        <div class="callout-body"><strong>Rate limit headers</strong><p>Every response includes <code>X-RateLimit-Limit</code>, <code>X-RateLimit-Remaining</code>, and <code>X-RateLimit-Reset</code> headers so you can implement backoff strategies.</p></div>
+      </div>
+
+      <!-- ERRORS -->
+      <h2 id="errors">ERROR <em>CODES</em> <a href="#errors" class="anchor">§</a></h2>
+      <p>EUP uses standard HTTP status codes. All error responses have a consistent JSON body with a machine-readable <code>code</code> field.</p>
+
+      <div class="code-block">
+        <div class="code-header">
+          <div class="code-lang"><div class="code-dots"><div class="cd cd1"></div><div class="cd cd2"></div><div class="cd cd3"></div></div>json — error response</div>
+        </div>
+        <pre><span class="tx">{</span>
+  <span class="pr">"error"</span><span class="tx">: {</span>
+    <span class="pr">"code"</span><span class="tx">:</span>     <span class="str">"PROMPT_NOT_FOUND"</span><span class="tx">,</span>
+    <span class="pr">"message"</span><span class="tx">:</span>  <span class="str">"Prompt 'prompt_abc123' does not exist in this workspace."</span><span class="tx">,</span>
+    <span class="pr">"status"</span><span class="tx">:</span>   <span class="num">404</span><span class="tx">,</span>
+    <span class="pr">"requestId"</span><span class="tx">:</span> <span class="str">"req_7hYm2LpXwN3q"</span>
+  <span class="tx">}</span>
+<span class="tx">}</span></pre>
+      </div>
+
+      <div class="callout danger">
+        <span class="callout-icon">🚨</span>
+        <div class="callout-body"><strong>Breaking change in v2</strong><p>The <code>error.code</code> field replaces the legacy <code>errorCode</code> field from v1. Update your error handling if migrating from v1.</p></div>
+      </div>
+
+      <!-- WEBHOOKS -->
+      <h2 id="webhooks">WEBHOOKS <a href="#webhooks" class="anchor">§</a></h2>
+      <p>Subscribe to delivery and run lifecycle events to keep your systems in sync. Webhooks are signed with HMAC-SHA256 using your workspace secret.</p>
+
+      <div class="endpoint-card">
+        <div class="endpoint-header">
+          <span class="method-badge method-post">POST</span>
+          <span class="endpoint-path">/webhooks/events</span>
+          <span class="endpoint-desc">Run event payload</span>
+        </div>
+        <div class="endpoint-body">Event types include <code>run.completed</code>, <code>run.failed</code>, and <code>prompt.published</code>. Retry policy uses exponential backoff for up to 24 hours.</div>
+      </div>
+
+      <!-- SDKs -->
+      <h2 id="sdks">SDKs &amp; <em>LIBRARIES</em> <a href="#sdks" class="anchor">§</a></h2>
+      <p>Official SDKs are available for JavaScript/Node, Python, and Java (beta). All SDKs are open-source and published on npm / PyPI / Maven.</p>
+
+      <div class="feature-grid">
+        <a href="https://www.npmjs.com/package/@eup-io/client" target="_blank" rel="noopener noreferrer" onclick="toast('Opening npm page...')" class="feat-card">
+          <div class="feat-card-icon">📦</div>
+          <div class="feat-card-title">@eup-io/client</div>
+          <div class="feat-card-desc">JavaScript & Node.js. TypeScript support built-in. v2.4.1</div>
+        </a>
+        <a href="https://pypi.org/project/eup-python/" target="_blank" rel="noopener noreferrer" onclick="toast('Opening PyPI page...')" class="feat-card">
+          <div class="feat-card-icon">🐍</div>
+          <div class="feat-card-title">eup-python</div>
+          <div class="feat-card-desc">Python 3.8+. Async support via asyncio. v2.3.0</div>
+        </a>
+        <a href="https://search.maven.org/search?q=eup-java" target="_blank" rel="noopener noreferrer" onclick="toast('Opening Maven page...')" class="feat-card">
+          <div class="feat-card-icon">☕</div>
+          <div class="feat-card-title">eup-java</div>
+          <div class="feat-card-desc">Java 11+. Spring Boot integration. Beta v0.9.2</div>
+        </a>
+      </div>
+
+      <!-- CHANGELOG -->
+      <h2 id="changelog">CHANGELOG <a href="#changelog" class="anchor">§</a></h2>
+
+      <div style="display:flex;flex-direction:column;gap:0;">
+        <div style="display:flex;gap:20px;padding-bottom:24px;position:relative;">
+          <div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0;">
+            <div style="width:10px;height:10px;border-radius:50%;background:var(--accent);border:2px solid var(--bg);margin-top:4px;"></div>
+            <div style="width:1px;flex:1;background:var(--border);margin-top:4px;"></div>
+          </div>
+          <div>
+            <div style="font-family:'Space Mono',monospace;font-size:11px;color:var(--accent);letter-spacing:1px;margin-bottom:6px;">v2.4.1 — Mar 7, 2026</div>
+            <p style="margin:0;font-size:14px;color:var(--muted2);">Fixed streaming edge-case with <code>gpt-4o</code> on long outputs exceeding 8K tokens. Improved error messages for invalid variable types. SDK patch for Node 22 compatibility.</p>
+          </div>
+        </div>
+        <div style="display:flex;gap:20px;padding-bottom:24px;position:relative;">
+          <div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0;">
+            <div style="width:10px;height:10px;border-radius:50%;background:var(--accent3);border:2px solid var(--bg);margin-top:4px;"></div>
+            <div style="width:1px;flex:1;background:var(--border);margin-top:4px;"></div>
+          </div>
+          <div>
+            <div style="font-family:'Space Mono',monospace;font-size:11px;color:var(--accent3);letter-spacing:1px;margin-bottom:6px;">v2.4.0 — Feb 18, 2026</div>
+            <p style="margin:0;font-size:14px;color:var(--muted2);">✨ <strong>New:</strong> Real-time streaming SSE via the <code>stream: true</code> parameter. <strong>New:</strong> <code>gemini-2.0-flash</code> model support. <strong>Improved:</strong> Prompt versioning API now supports diff comparison.</p>
+          </div>
+        </div>
+        <div style="display:flex;gap:20px;">
+          <div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0;">
+            <div style="width:10px;height:10px;border-radius:50%;background:var(--muted);border:2px solid var(--bg);margin-top:4px;"></div>
+          </div>
+          <div>
+            <div style="font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);letter-spacing:1px;margin-bottom:6px;">v2.3.0 — Jan 5, 2026</div>
+            <p style="margin:0;font-size:14px;color:var(--muted2);">Team workspace API. Role-based scoping for API keys. Webhook signature verification using HMAC-SHA256. Python SDK async support.</p>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /doc-content -->
+
+    <!-- FEEDBACK -->
+    <div class="feedback-bar">
+      <div class="fb-text"><strong>Was this page helpful?</strong> Let us know how we can improve.</div>
+      <div class="fb-btns">
+        <button class="fb-btn yes" onclick="toast('Thanks for the feedback! 🎉', 'ok')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14Z"/><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>
+          Yes
+        </button>
+        <button class="fb-btn" onclick="toast('Feedback noted — we\'ll improve this page')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3H10Z"/><path d="M17 2h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"/></svg>
+          No
+        </button>
+        <button class="fb-btn" onclick="toast('Opening GitHub Issues...')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          Report Issue
+        </button>
+      </div>
+    </div>
+
+    <!-- NEXT / PREV -->
+    <div class="doc-nav-footer">
+      <a href="#intro" class="doc-nav-btn prev" onclick="setActive(document.querySelector('.sidebar-link[href=\'#intro\']'))">
+        <div class="dnb-label">← Previous</div>
+        <div class="dnb-title">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          Overview
+        </div>
+      </a>
+      <a href="#authentication" class="doc-nav-btn next" onclick="setActive(document.querySelector('.sidebar-link[href=\'#authentication\']'))">
+        <div class="dnb-label">Next →</div>
+        <div class="dnb-title">
+          Authentication
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </div>
+      </a>
+    </div>
+
+  </main>
+
+  <!-- ═══ RIGHT TOC ═══ -->
+  <aside class="toc">
+    <div class="toc-label">On this page</div>
+    <a href="#concepts" class="toc-link" onclick="setTocActive(this)">What is EUP?</a>
+    <a href="#quickstart" class="toc-link" onclick="setTocActive(this)">Quick Start</a>
+    <a href="#quickstart" class="toc-link sub" onclick="setTocActive(this)">Install SDK</a>
+    <a href="#quickstart" class="toc-link sub" onclick="setTocActive(this)">First API call</a>
+    <a href="#authentication" class="toc-link" onclick="setTocActive(this)">Authentication</a>
+    <a href="#authentication" class="toc-link sub" onclick="setTocActive(this)">Key types</a>
+    <a href="#endpoints" class="toc-link" onclick="setTocActive(this)">API Endpoints</a>
+    <a href="#endpoints" class="toc-link sub" onclick="setTocActive(this)">Parameters</a>
+    <a href="#endpoints" class="toc-link sub" onclick="setTocActive(this)">Response</a>
+    <a href="#rate-limits" class="toc-link" onclick="setTocActive(this)">Rate Limits</a>
+    <a href="#errors" class="toc-link" onclick="setTocActive(this)">Error Codes</a>
+    <a href="#sdks" class="toc-link" onclick="setTocActive(this)">SDKs</a>
+    <a href="#changelog" class="toc-link" onclick="setTocActive(this)">Changelog</a>
+
+    <div class="toc-divider"></div>
+    <div class="toc-actions">
+      <a href="https://github.com/eup-io/docs" class="toc-action" target="_blank" rel="noopener noreferrer" onclick="toast('Opening GitHub...')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12c0 4.42 2.87 8.17 6.84 9.49.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.46-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.61.07-.61 1 .07 1.53 1.03 1.53 1.03.9 1.52 2.34 1.08 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02a9.56 9.56 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.74c0 .27.18.58.69.48A10.01 10.01 0 0 0 22 12c0-5.52-4.48-10-10-10Z"/></svg>
+        Edit on GitHub
+      </a>
+      <a href="docspage.html" class="toc-action" onclick="copyPageLink(event)">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        Copy link
+      </a>
+      <a href="bookademo.html" class="toc-action">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        Get support
+      </a>
+    </div>
+  </aside>
+
+</div><!-- /docs-layout -->
+
+<script>
+  // ── CURSOR ──
+  const cur = document.getElementById('cursor');
+  const ring = document.getElementById('cursor-ring');
+  document.addEventListener('mousemove', e => {
+    cur.style.left = e.clientX+'px'; cur.style.top = e.clientY+'px';
+    setTimeout(() => { ring.style.left = e.clientX+'px'; ring.style.top = e.clientY+'px'; }, 50);
+  });
+
+  // ── TOAST ──
+  let _tt;
+  function toast(msg, type='') {
+    const el = document.getElementById('toast');
+    document.getElementById('toast-msg').textContent = msg;
+    el.className = 'show ' + type;
+    clearTimeout(_tt); _tt = setTimeout(() => el.classList.remove('show'), 2500);
+  }
+
+  // ── SIDEBAR ACTIVE ──
+  function setActive(el) {
+    document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+    el.classList.add('active');
+  }
+
+  // ── TOC ACTIVE ──
+  function setTocActive(el) {
+    document.querySelectorAll('.toc-link').forEach(l => l.classList.remove('active'));
+    el.classList.add('active');
+  }
+
+  // ── SEARCH ──
+  const searchResults = [
+    { title:'Getting Started', path:'docs / introduction', icon:'🚀', tag:'guide', id:'intro' },
+    { title:'Authentication & API Keys', path:'docs / api / auth', icon:'🔐', tag:'api', id:'authentication' },
+    { title:'Prompt Builder Reference', path:'docs / core', icon:'⚡', tag:'ref', id:'builder' },
+    { title:'Webhooks', path:'docs / api / webhooks', icon:'🪝', tag:'api', id:'webhooks' },
+    { title:'Rate Limits', path:'docs / api / limits', icon:'⏱️', tag:'ref', id:'rate-limits' },
+    { title:'SDKs & Libraries', path:'docs / sdks', icon:'📦', tag:'guide', id:'sdks' },
+    { title:'Error Codes', path:'docs / api / errors', icon:'⚠️', tag:'ref', id:'errors' },
+    { title:'Changelog', path:'docs / changelog', icon:'📋', tag:'guide', id:'changelog' },
+  ];
+
+  function handleSearch(val) {
+    const dd = document.getElementById('searchDropdown');
+    if (!val.trim()) { dd.classList.remove('show'); return; }
+    const filtered = searchResults.filter(r => r.title.toLowerCase().includes(val.toLowerCase()) || r.path.includes(val.toLowerCase()));
+    if (!filtered.length) { dd.classList.remove('show'); return; }
+    dd.innerHTML = filtered.map(r => `
+      <div class="search-result" onclick="navigate('${r.id}')">
+        <span class="sr-icon">${r.icon}</span>
+        <div><div class="sr-title">${r.title}</div><div class="sr-path">${r.path}</div></div>
+        <span class="sr-tag ${r.tag}">${r.tag.toUpperCase()}</span>
+      </div>
+    `).join('');
+    dd.classList.add('show');
+  }
+
+  function closeSearch() {
+    document.getElementById('searchDropdown').classList.remove('show');
+  }
+
+  function copyPageLink(event) {
+    event.preventDefault();
+    navigator.clipboard.writeText(window.location.href).then(() => {
+      toast('Link copied to clipboard! ✓', 'ok');
+    }).catch(() => {
+      toast('Copy failed — try manually');
+    });
+  }
+
+  function navigate(id) {
+    closeSearch();
+    document.getElementById('searchInput').value = '';
+    const el = document.getElementById(id);
+    if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'start' }); toast('Navigating to section...'); }
+    else toast('Opening: ' + id);
+  }
+
+  // ── CODE TABS ──
+  function switchCodeTab(tabGroupId, panelId, btn) {
+    const tabGroup = document.getElementById(tabGroupId);
+    const codeBlock = tabGroup.nextElementSibling;
+    tabGroup.querySelectorAll('.ctab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    codeBlock.querySelectorAll('.code-tab-panel').forEach(p => p.classList.remove('active'));
+    const panel = document.getElementById(panelId);
+    if (panel) panel.classList.add('active');
+  }
+
+  // ── COPY CODE ──
+  function copyCode(btn, text) {
+    const code = text || btn.closest('.code-block').querySelector('pre').innerText;
+    navigator.clipboard.writeText(code).then(() => {
+      btn.classList.add('copied');
+      btn.innerHTML = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg> Copied!`;
+      toast('Code copied to clipboard! ✓', 'ok');
+      setTimeout(() => {
+        btn.classList.remove('copied');
+        btn.innerHTML = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy`;
+      }, 2500);
+    }).catch(() => toast('Copy failed — try manually'));
+  }
+
+  // ── MOBILE SIDEBAR ──
+  function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+  }
+
+  // ── KEYBOARD SHORTCUT ──
+  document.addEventListener('keydown', e => {
+    if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+      e.preventDefault();
+      document.getElementById('searchInput').focus();
+    }
+    if (e.key === 'Escape') closeSearch();
+  });
+
+  // ── SCROLL SPY (TOC) ──
+  const sections = ['concepts','quickstart','authentication','endpoints','rate-limits','errors','sdks','changelog'];
+  const tocLinks = document.querySelectorAll('.toc-link:not(.sub)');
+
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        tocLinks.forEach(l => l.classList.remove('active'));
+        const matching = document.querySelector(`.toc-link[href="#${entry.target.id}"]`);
+        if (matching) matching.classList.add('active');
+      }
+    });
+  }, { threshold: .4, rootMargin: '-60px 0px -60% 0px' });
+
+  sections.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) observer.observe(el);
+  });
+</script>
+</body>
+</html>

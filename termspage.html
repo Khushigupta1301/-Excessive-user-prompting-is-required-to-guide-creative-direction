@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>EUP — Terms of Service</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #0a0a0f;
+      --surface: #111118;
+      --card: #16161f;
+      --accent: #e8ff47;
+      --accent2: #ff4757;
+      --text: #f0f0f8;
+      --muted: #6b6b8a;
+      --border: rgba(255,255,255,0.08);
+      --glow: rgba(232,255,71,0.14);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.65;
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image: linear-gradient(rgba(255,255,255,.02) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.02) 1px, transparent 1px);
+      background-size: 56px 56px;
+      opacity: .45;
+      z-index: 1;
+    }
+
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 32px;
+      background: rgba(10,10,15,.82);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+    }
+    .logo {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 28px;
+      letter-spacing: 3px;
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .logo span { color: var(--text); }
+    .nav-links { display: flex; gap: 20px; }
+    .nav-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .nav-links a:hover { color: var(--text); }
+
+    .wrap {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 52px 24px 90px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .tag {
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      border: 1px solid rgba(232,255,71,.3);
+      color: var(--accent);
+      background: rgba(232,255,71,.05);
+      border-radius: 999px;
+      padding: 5px 12px;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      font-family: 'Space Mono', monospace;
+      margin-bottom: 18px;
+    }
+    .title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(44px, 7vw, 90px);
+      line-height: .92;
+      letter-spacing: 1px;
+      margin-bottom: 10px;
+    }
+    .title em { color: var(--accent); font-style: normal; }
+    .sub {
+      color: var(--muted);
+      margin-bottom: 30px;
+      font-size: 14px;
+      font-family: 'Space Mono', monospace;
+    }
+
+    .warn {
+      background: rgba(255,71,87,.08);
+      border: 1px solid rgba(255,71,87,.22);
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin-bottom: 18px;
+      color: #ffd6db;
+      font-size: 14px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 26px;
+      margin-bottom: 16px;
+    }
+    h2 {
+      font-family: 'Bebas Neue', sans-serif;
+      letter-spacing: 1px;
+      font-size: 34px;
+      margin-bottom: 10px;
+    }
+    h2 em { color: var(--accent); font-style: normal; }
+    p, li { color: #cfcfe2; font-size: 15px; }
+    ul { padding-left: 18px; margin-top: 10px; }
+    li { margin-bottom: 8px; }
+
+    .cta {
+      margin-top: 28px;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .btn {
+      text-decoration: none;
+      border-radius: 8px;
+      padding: 12px 18px;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: .5px;
+    }
+    .btn-primary {
+      background: var(--accent);
+      color: #0a0a0f;
+      box-shadow: 0 10px 28px var(--glow);
+    }
+    .btn-ghost {
+      color: var(--text);
+      border: 1px solid var(--border);
+      background: transparent;
+    }
+
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 24px;
+      text-align: center;
+      color: var(--muted);
+      position: relative;
+      z-index: 2;
+      background: var(--surface);
+      font-size: 12px;
+      font-family: 'Space Mono', monospace;
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="homepage.html" class="logo">E<span>U</span>P</a>
+    <div class="nav-links">
+      <a href="homepage.html">Home</a>
+      <a href="docspage.html">Docs</a>
+      <a href="privacypage.html">Privacy</a>
+      <a href="bookademo.html">Contact</a>
+    </div>
+  </nav>
+
+  <main class="wrap">
+    <div class="tag">Policy • Legal</div>
+    <h1 class="title">TERMS OF <em>SERVICE</em></h1>
+    <p class="sub">Effective date: March 7, 2026 · Last updated: March 7, 2026</p>
+
+    <div class="warn">By using EUP, you agree to these terms, including usage limits, acceptable use, and account security obligations.</div>
+
+    <section class="card">
+      <h2>ACCOUNT <em>TERMS</em></h2>
+      <ul>
+        <li>You are responsible for account credentials and all activity under your account.</li>
+        <li>You must provide accurate information and keep it up to date.</li>
+        <li>You may not share credentials in a way that bypasses plan restrictions.</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2>ACCEPTABLE <em>USE</em></h2>
+      <ul>
+        <li>No abuse of API, scraping, or attempts to disrupt service.</li>
+        <li>No unlawful use, including malware distribution or fraud.</li>
+        <li>No attempts to access data or systems without authorization.</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2>BILLING & <em>PLANS</em></h2>
+      <p>Paid plans renew according to your selected billing cycle. You can cancel anytime, and changes apply at the next renewal unless otherwise stated.</p>
+    </section>
+
+    <section class="card">
+      <h2>LIABILITY & <em>DISCLAIMERS</em></h2>
+      <p>Service is provided on an "as available" basis. To the maximum extent permitted by law, EUP is not liable for indirect or consequential damages arising from service use.</p>
+    </section>
+
+    <section class="card">
+      <h2>CHANGES TO <em>TERMS</em></h2>
+      <p>We may update terms as product or legal requirements evolve. Continued usage after updates means acceptance of revised terms.</p>
+    </section>
+
+    <div class="cta">
+      <a href="privacypage.html" class="btn btn-ghost">Read Privacy Policy</a>
+      <a href="loginpage.html" class="btn btn-primary">Back to Login</a>
+    </div>
+  </main>
+
+  <footer>© 2026 EUP — Excessive User Prompting</footer>
+</body>
+</html>

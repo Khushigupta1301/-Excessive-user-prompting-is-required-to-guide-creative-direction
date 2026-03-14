@@ -1,0 +1,1409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>EUP — Book a Demo / Contact Sales</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,300&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #0a0a0f;
+      --surface: #111118;
+      --card: #16161f;
+      --accent: #e8ff47;
+      --accent2: #ff4757;
+      --accent3: #00d2ff;
+      --success: #00ff88;
+      --text: #f0f0f8;
+      --muted: #6b6b8a;
+      --border: rgba(255,255,255,0.07);
+      --border-hover: rgba(232,255,71,0.25);
+      --glow: rgba(232,255,71,0.15);
+      --glow2: rgba(0,210,255,0.12);
+      --input-bg: rgba(255,255,255,0.03);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      cursor: none;
+      overflow-x: hidden;
+    }
+
+    /* ─── CURSOR ─── */
+    #cursor {
+      width: 10px; height: 10px;
+      background: var(--accent); border-radius: 50%;
+      position: fixed; top: 0; left: 0;
+      pointer-events: none; z-index: 9999;
+      transform: translate(-50%,-50%);
+      transition: transform .08s ease;
+    }
+    #cursor-ring {
+      width: 36px; height: 36px;
+      border: 1.5px solid var(--accent); border-radius: 50%;
+      position: fixed; top: 0; left: 0;
+      pointer-events: none; z-index: 9998;
+      transform: translate(-50%,-50%);
+      transition: all .18s ease; opacity: .5;
+    }
+    body:has(button:hover) #cursor-ring,
+    body:has(a:hover) #cursor-ring,
+    body:has(input:focus) #cursor-ring,
+    body:has(select:focus) #cursor-ring,
+    body:has(textarea:focus) #cursor-ring {
+      width: 54px; height: 54px;
+      border-color: var(--accent3); opacity: 1;
+    }
+
+    /* ─── NOISE ─── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none; z-index: 1; opacity: .45;
+    }
+
+    /* ─── BG ─── */
+    .bg-grid {
+      position: fixed; inset: 0; z-index: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.02) 1px, transparent 1px);
+      background-size: 56px 56px; pointer-events: none;
+    }
+    .bg-orb {
+      position: fixed; border-radius: 50%;
+      filter: blur(130px); pointer-events: none; z-index: 0;
+    }
+    .orb1 { width:700px; height:700px; background:rgba(232,255,71,.05); top:-200px; right:-200px; animation: orbF 14s ease-in-out infinite; }
+    .orb2 { width:450px; height:450px; background:rgba(0,210,255,.045); bottom:-120px; left:-120px; animation: orbF 18s ease-in-out infinite reverse; }
+    .orb3 { width:280px; height:280px; background:rgba(255,71,87,.04); top:45%; left:42%; animation: orbF 10s ease-in-out infinite; }
+    @keyframes orbF { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(25px,-25px) scale(1.07)} }
+
+    /* ─── NAVBAR ─── */
+    nav {
+      position: fixed; top:0; left:0; right:0; z-index:100;
+      display:flex; align-items:center; justify-content:space-between;
+      padding: 20px 48px;
+      background: rgba(10,10,15,.75);
+      backdrop-filter: blur(22px);
+      border-bottom: 1px solid var(--border);
+      animation: slideDown .6s ease forwards;
+    }
+    @keyframes slideDown { from{transform:translateY(-100%);opacity:0} to{transform:translateY(0);opacity:1} }
+
+    .nav-logo {
+      font-family:'Bebas Neue',sans-serif; font-size:28px;
+      letter-spacing:3px; color:var(--accent); text-decoration:none;
+    }
+    .nav-logo span { color:var(--text); }
+
+    .nav-links { display:flex; gap:32px; list-style:none; }
+    .nav-links a {
+      font-size:13px; font-weight:500; letter-spacing:1px;
+      text-transform:uppercase; color:var(--muted); text-decoration:none;
+      position:relative; padding-bottom:4px; transition:color .3s;
+    }
+    .nav-links a::after {
+      content:''; position:absolute; bottom:0; left:0;
+      width:0; height:1.5px; background:var(--accent); transition:width .3s;
+    }
+    .nav-links a:hover { color:var(--text); }
+    .nav-links a:hover::after { width:100%; }
+    .nav-links a.active { color:var(--accent); }
+    .nav-links a.active::after { width:100%; }
+
+    .nav-cta { display:flex; gap:12px; }
+    .btn-ghost {
+      padding:10px 22px; border:1px solid var(--border);
+      background:transparent; color:var(--text);
+      font-family:'DM Sans',sans-serif; font-size:13px; font-weight:500;
+      border-radius:6px; cursor:none; transition:all .3s;
+    }
+    .btn-ghost:hover { border-color:var(--accent); color:var(--accent); }
+    .btn-primary-sm {
+      padding:10px 24px; background:var(--accent); color:#0a0a0f;
+      font-family:'DM Sans',sans-serif; font-size:13px; font-weight:700;
+      border:none; border-radius:6px; cursor:none; transition:all .3s;
+      overflow:hidden; position:relative;
+    }
+    .btn-primary-sm::before {
+      content:''; position:absolute; inset:0;
+      background:linear-gradient(135deg,transparent 35%,rgba(255,255,255,.3) 50%,transparent 65%);
+      transform:translateX(-100%); transition:transform .5s;
+    }
+    .btn-primary-sm:hover { transform:translateY(-2px); box-shadow:0 8px 28px var(--glow); }
+    .btn-primary-sm:hover::before { transform:translateX(100%); }
+
+    /* ─── HERO STRIP ─── */
+    .hero-strip {
+      padding: 140px 48px 0;
+      position: relative; z-index: 2;
+      text-align: center;
+      animation: fadeUp .6s .2s ease both;
+    }
+    .hero-tag {
+      display:inline-flex; align-items:center; gap:8px;
+      padding:5px 14px; border:1px solid rgba(232,255,71,.25);
+      border-radius:100px; font-size:10px; letter-spacing:2px;
+      text-transform:uppercase; color:var(--accent);
+      background:rgba(232,255,71,.04); margin-bottom:24px;
+      font-family:'Space Mono',monospace;
+    }
+    .hero-tag .dot { width:5px; height:5px; border-radius:50%; background:var(--accent); animation:pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1}50%{opacity:.4} }
+
+    .hero-title {
+      font-family:'Bebas Neue',sans-serif;
+      font-size: clamp(56px,8vw,120px);
+      line-height:.92; letter-spacing:1px;
+      margin-bottom:20px;
+    }
+    .hero-title em { font-style:normal; color:var(--accent); }
+    .hero-title .stroke {
+      -webkit-text-stroke:2px rgba(255,255,255,.35);
+      color:transparent;
+    }
+    .hero-sub {
+      font-size:17px; color:var(--muted); max-width:560px;
+      margin:0 auto 48px; line-height:1.7;
+    }
+
+    /* ─── TAB SWITCHER ─── */
+    .tab-wrap {
+      display:flex; justify-content:center; margin-bottom:56px;
+      position:relative; z-index:2;
+      animation: fadeUp .5s .4s ease both;
+    }
+    .tab-pills {
+      display:flex;
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:12px; padding:5px; gap:4px;
+    }
+    .tab-pill {
+      padding:11px 28px; border-radius:9px;
+      font-family:'DM Sans',sans-serif; font-size:14px; font-weight:600;
+      letter-spacing:.3px; border:none; cursor:none;
+      transition:all .35s cubic-bezier(.16,1,.3,1);
+      color:var(--muted); background:transparent;
+      display:flex; align-items:center; gap:8px;
+    }
+    .tab-pill.active {
+      background:var(--accent); color:#0a0a0f;
+      box-shadow:0 4px 20px var(--glow);
+    }
+    .tab-pill:not(.active):hover { color:var(--text); background:rgba(255,255,255,.04); }
+
+    /* ─── MAIN CONTENT ─── */
+    .main-content {
+      max-width:1160px; margin:0 auto;
+      padding:0 48px 100px;
+      position:relative; z-index:2;
+    }
+
+    /* ─── TAB PANELS ─── */
+    .tab-panel { display:none; }
+    .tab-panel.active {
+      display:grid;
+      grid-template-columns:1fr 420px;
+      gap:40px;
+      animation:panelIn .45s cubic-bezier(.16,1,.3,1) both;
+    }
+    @keyframes panelIn { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+
+    /* ─── LEFT COLUMN ─── */
+    .left-col { display:flex; flex-direction:column; gap:28px; }
+
+    .form-card {
+      background:var(--card); border:1px solid var(--border);
+      border-radius:20px; padding:40px; position:relative; overflow:hidden;
+    }
+    .form-card::before {
+      content:''; position:absolute; top:0; left:0; right:0; height:2px;
+      background:linear-gradient(90deg,transparent,var(--accent),transparent);
+      opacity:.6;
+    }
+
+    .fc-title {
+      font-family:'Bebas Neue',sans-serif; font-size:28px; letter-spacing:2px;
+      margin-bottom:6px;
+    }
+    .fc-title em { font-style:normal; color:var(--accent); }
+    .fc-sub { font-size:13px; color:var(--muted); margin-bottom:28px; }
+
+    /* ─── FORM ELEMENTS ─── */
+    .field-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+    .form-group { margin-bottom:18px; }
+    .form-group.full { grid-column:1/-1; }
+
+    .form-label {
+      display:flex; justify-content:space-between; align-items:center;
+      font-size:11px; font-weight:500; letter-spacing:1px;
+      text-transform:uppercase; color:var(--muted); margin-bottom:8px;
+      font-family:'Space Mono',monospace; transition:color .3s;
+    }
+    .form-group.focused .form-label { color:var(--accent); }
+    .label-opt { font-size:9px; opacity:.55; text-transform:none; letter-spacing:0; }
+
+    .input-wrap { position:relative; }
+    .input-icon {
+      position:absolute; left:14px; top:50%;
+      transform:translateY(-50%); color:var(--muted);
+      pointer-events:none; transition:color .3s;
+    }
+    .form-group.focused .input-icon { color:var(--accent); }
+
+    .form-input, .form-select, .form-textarea {
+      width:100%; padding:13px 14px 13px 42px;
+      background:var(--input-bg); border:1px solid var(--border);
+      border-radius:10px; color:var(--text);
+      font-family:'DM Sans',sans-serif; font-size:14px;
+      outline:none; transition:all .3s;
+    }
+    .form-input::placeholder,
+    .form-textarea::placeholder { color:var(--muted); font-size:13px; }
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+      border-color:var(--accent);
+      background:rgba(232,255,71,.025);
+      box-shadow:0 0 0 3px rgba(232,255,71,.07);
+    }
+    .form-input.valid { border-color:rgba(0,255,136,.4); }
+    .form-input.invalid { border-color:rgba(255,71,87,.4); }
+
+    .form-select {
+      appearance:none; cursor:pointer;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b6b8a' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat:no-repeat; background-position:right 14px center;
+      padding-right:36px;
+    }
+    .form-select option { background:#16161f; }
+
+    .form-textarea {
+      resize:vertical; min-height:100px; padding:13px 14px;
+    }
+
+    .input-status {
+      position:absolute; right:12px; top:50%;
+      transform:translateY(-50%); font-size:14px;
+      pointer-events:none; opacity:0; transition:opacity .3s;
+    }
+    .input-status.show { opacity:1; }
+
+    .field-err {
+      font-size:11px; color:var(--accent2); margin-top:5px;
+      font-family:'Space Mono',monospace;
+      display:flex; align-items:center; gap:5px;
+      opacity:0; transform:translateY(-3px); transition:all .3s; pointer-events:none;
+    }
+    .field-err.show { opacity:1; transform:translateY(0); }
+
+    /* ─── RADIO CARDS ─── */
+    .radio-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    .radio-card {
+      padding:14px 16px; border:1.5px solid var(--border);
+      border-radius:10px; cursor:none; transition:all .3s;
+      display:flex; align-items:center; gap:10px;
+      position:relative;
+    }
+    .radio-card:hover { border-color:rgba(232,255,71,.2); background:rgba(232,255,71,.02); }
+    .radio-card.selected { border-color:var(--accent); background:rgba(232,255,71,.05); }
+    .radio-card.selected::after {
+      content:'✓'; position:absolute; top:8px; right:10px;
+      font-size:10px; font-weight:700; color:var(--accent);
+    }
+    .radio-icon { font-size:18px; }
+    .radio-label { font-size:13px; font-weight:600; }
+    .radio-desc { font-size:11px; color:var(--muted); }
+
+    /* ─── CHECKBOX ─── */
+    .check-row {
+      display:flex; align-items:flex-start; gap:10px;
+      cursor:none; padding:4px 0;
+    }
+    .cbox {
+      width:18px; height:18px; min-width:18px;
+      border:1.5px solid var(--border); border-radius:5px;
+      background:var(--input-bg); margin-top:1px;
+      display:flex; align-items:center; justify-content:center;
+      transition:all .25s;
+    }
+    .cbox.checked { background:var(--accent); border-color:var(--accent); }
+    .cbox.checked::after { content:'✓'; font-size:11px; font-weight:700; color:#0a0a0f; }
+    .check-text { font-size:13px; color:var(--muted); line-height:1.5; }
+    .check-text a { color:var(--accent); text-decoration:none; }
+
+    /* ─── SUBMIT BUTTON ─── */
+    .btn-submit {
+      width:100%; padding:16px;
+      background:var(--accent); color:#0a0a0f;
+      font-family:'DM Sans',sans-serif; font-size:15px; font-weight:700;
+      letter-spacing:.5px; border:none; border-radius:10px;
+      cursor:none; position:relative; overflow:hidden;
+      transition:all .3s; margin-top:8px;
+      display:flex; align-items:center; justify-content:center; gap:10px;
+    }
+    .btn-submit::before {
+      content:''; position:absolute; inset:0;
+      background:linear-gradient(135deg,transparent 30%,rgba(255,255,255,.32) 50%,transparent 70%);
+      transform:translateX(-100%); transition:transform .6s;
+    }
+    .btn-submit:hover { transform:translateY(-2px); box-shadow:0 14px 40px var(--glow); }
+    .btn-submit:hover::before { transform:translateX(100%); }
+    .btn-submit.loading { pointer-events:none; opacity:.8; }
+    .btn-submit .spinner {
+      width:18px; height:18px; border:2px solid rgba(0,0,0,.2);
+      border-top-color:#0a0a0f; border-radius:50%;
+      animation:spin .7s linear infinite; display:none;
+    }
+    .btn-submit.loading .spinner { display:block; }
+    .btn-submit.loading .btxt,.btn-submit.loading .barr { display:none; }
+    @keyframes spin { to{transform:rotate(360deg)} }
+    .barr { transition:transform .3s; }
+    .btn-submit:hover .barr { transform:translateX(4px); }
+
+    /* ─── RIGHT COLUMN ─── */
+    .right-col { display:flex; flex-direction:column; gap:20px; }
+
+    /* ─── INFO CARD ─── */
+    .info-card {
+      background:var(--card); border:1px solid var(--border);
+      border-radius:20px; padding:32px; position:relative; overflow:hidden;
+    }
+    .info-card::before {
+      content:''; position:absolute; top:0; left:0; right:0; height:2px;
+      background:linear-gradient(90deg,transparent,var(--accent3),transparent);
+      opacity:.5;
+    }
+    .info-title {
+      font-family:'Bebas Neue',sans-serif; font-size:22px; letter-spacing:2px;
+      margin-bottom:18px; color:var(--accent3);
+    }
+
+    /* ─── CALENDAR ─── */
+    .cal-header {
+      display:flex; align-items:center; justify-content:space-between;
+      margin-bottom:16px;
+    }
+    .cal-month {
+      font-family:'Bebas Neue',sans-serif; font-size:20px; letter-spacing:2px;
+    }
+    .cal-nav {
+      display:flex; gap:6px;
+    }
+    .cal-btn {
+      width:30px; height:30px; border-radius:7px;
+      background:var(--input-bg); border:1px solid var(--border);
+      color:var(--muted); cursor:none; display:flex; align-items:center; justify-content:center;
+      transition:all .3s; font-size:12px;
+    }
+    .cal-btn:hover { border-color:var(--accent); color:var(--accent); }
+
+    .cal-grid {
+      display:grid; grid-template-columns:repeat(7,1fr);
+      gap:4px; margin-bottom:16px;
+    }
+    .cal-day-name {
+      text-align:center; font-size:10px; letter-spacing:1px;
+      text-transform:uppercase; color:var(--muted); padding:4px 0;
+      font-family:'Space Mono',monospace;
+    }
+    .cal-day {
+      aspect-ratio:1; display:flex; align-items:center; justify-content:center;
+      border-radius:8px; font-size:13px; cursor:none; transition:all .25s;
+      border:1px solid transparent;
+    }
+    .cal-day:not(.empty):not(.past):hover {
+      background:rgba(232,255,71,.08); border-color:rgba(232,255,71,.2); color:var(--accent);
+    }
+    .cal-day.selected {
+      background:var(--accent); color:#0a0a0f; font-weight:700;
+    }
+    .cal-day.today:not(.selected) { border-color:rgba(232,255,71,.4); color:var(--accent); }
+    .cal-day.past { color:var(--muted); opacity:.3; pointer-events:none; }
+    .cal-day.empty { pointer-events:none; }
+    .cal-day.has-slot::after {
+      content:''; display:block; width:4px; height:4px;
+      border-radius:50%; background:var(--accent3);
+      position:absolute; bottom:3px;
+    }
+    .cal-day { position:relative; }
+
+    /* ─── TIME SLOTS ─── */
+    .slots-label {
+      font-size:11px; letter-spacing:2px; text-transform:uppercase;
+      color:var(--muted); margin-bottom:10px; font-family:'Space Mono',monospace;
+    }
+    .slots-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:7px; }
+    .slot {
+      padding:8px 6px; border:1px solid var(--border);
+      border-radius:8px; text-align:center; font-size:12px;
+      font-family:'Space Mono',monospace; cursor:none; transition:all .25s;
+      color:var(--muted);
+    }
+    .slot:not(.taken):hover { border-color:rgba(232,255,71,.3); color:var(--accent); background:rgba(232,255,71,.04); }
+    .slot.selected { background:var(--accent); color:#0a0a0f; border-color:var(--accent); font-weight:700; }
+    .slot.taken { opacity:.3; pointer-events:none; text-decoration:line-through; }
+    .slot-tz { font-size:9px; opacity:.6; display:block; }
+
+    /* ─── STATS / TRUST ─── */
+    .trust-card {
+      background:var(--surface); border:1px solid var(--border);
+      border-radius:16px; padding:24px;
+    }
+    .trust-title {
+      font-size:11px; letter-spacing:2px; text-transform:uppercase;
+      color:var(--muted); margin-bottom:16px; font-family:'Space Mono',monospace;
+    }
+    .trust-stats { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    .tstat {
+      background:var(--card); border:1px solid var(--border);
+      border-radius:10px; padding:14px; text-align:center;
+      transition:all .3s;
+    }
+    .tstat:hover { border-color:rgba(232,255,71,.2); }
+    .tstat-num {
+      font-family:'Bebas Neue',sans-serif; font-size:28px; letter-spacing:2px;
+      color:var(--text); display:block; margin-bottom:2px;
+    }
+    .tstat-num em { font-style:normal; color:var(--accent); }
+    .tstat-lbl { font-size:11px; color:var(--muted); }
+
+    /* ─── TESTIMONIAL MINI ─── */
+    .mini-testimonial {
+      background:var(--surface); border:1px solid var(--border);
+      border-radius:16px; padding:24px; position:relative;
+    }
+    .quote-mark {
+      position:absolute; top:16px; right:20px;
+      font-family:'Bebas Neue',sans-serif; font-size:60px;
+      color:rgba(232,255,71,.08); line-height:1; pointer-events:none;
+    }
+    .mini-stars { color:var(--accent); font-size:12px; letter-spacing:2px; margin-bottom:12px; }
+    .mini-text { font-size:13px; color:var(--muted); line-height:1.7; font-style:italic; margin-bottom:16px; }
+    .mini-author { display:flex; align-items:center; gap:10px; }
+    .mini-avatar {
+      width:36px; height:36px; border-radius:50%;
+      background:var(--card); border:1px solid var(--border);
+      display:flex; align-items:center; justify-content:center;
+      font-size:14px; font-weight:700;
+    }
+    .mini-name { font-size:13px; font-weight:600; }
+    .mini-role { font-size:11px; color:var(--muted); }
+
+    /* ─── TEAM CARD ─── */
+    .team-card {
+      background:var(--card); border:1px solid var(--border);
+      border-radius:16px; padding:24px;
+    }
+    .team-title {
+      font-size:11px; letter-spacing:2px; text-transform:uppercase;
+      color:var(--muted); margin-bottom:16px; font-family:'Space Mono',monospace;
+    }
+    .team-members { display:flex; flex-direction:column; gap:12px; }
+    .team-member {
+      display:flex; align-items:center; gap:12px;
+      padding:10px 12px; border:1px solid var(--border);
+      border-radius:10px; transition:all .3s; cursor:none;
+    }
+    .team-member:hover { border-color:rgba(232,255,71,.2); background:rgba(232,255,71,.02); }
+    .member-av {
+      width:38px; height:38px; border-radius:50%;
+      display:flex; align-items:center; justify-content:center;
+      font-size:16px; background:var(--surface); border:1px solid var(--border);
+      flex-shrink:0;
+    }
+    .member-info { flex:1; }
+    .member-name { font-size:13px; font-weight:600; }
+    .member-role { font-size:11px; color:var(--muted); }
+    .member-badge {
+      font-size:9px; padding:2px 8px; border-radius:100px;
+      font-family:'Space Mono',monospace; letter-spacing:1px;
+    }
+    .badge-online { background:rgba(0,255,136,.1); color:var(--success); border:1px solid rgba(0,255,136,.2); }
+    .badge-busy { background:rgba(255,165,0,.1); color:#ffa500; border:1px solid rgba(255,165,0,.2); }
+
+    /* ─── FAQ ─── */
+    .faq-section { position:relative; z-index:2; max-width:1160px; margin:0 auto; padding:0 48px 80px; }
+    .faq-title {
+      font-family:'Bebas Neue',sans-serif; font-size:clamp(36px,4vw,56px);
+      letter-spacing:2px; margin-bottom:32px; text-align:center;
+    }
+    .faq-title em { font-style:normal; color:var(--accent); }
+    .faq-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    .faq-item {
+      background:var(--card); border:1px solid var(--border);
+      border-radius:14px; overflow:hidden; transition:border-color .3s;
+    }
+    .faq-item:hover { border-color:rgba(232,255,71,.15); }
+    .faq-q {
+      padding:18px 22px; font-size:14px; font-weight:600;
+      cursor:none; display:flex; justify-content:space-between; align-items:center; gap:12px;
+      transition:color .3s;
+    }
+    .faq-q:hover { color:var(--accent); }
+    .faq-icon { font-size:18px; transition:transform .35s; flex-shrink:0; color:var(--muted); }
+    .faq-item.open .faq-icon { transform:rotate(45deg); color:var(--accent); }
+    .faq-a {
+      max-height:0; overflow:hidden;
+      transition:max-height .4s cubic-bezier(.16,1,.3,1), padding .3s;
+      font-size:13px; color:var(--muted); line-height:1.7;
+      padding:0 22px;
+    }
+    .faq-item.open .faq-a { max-height:200px; padding:0 22px 18px; }
+
+    /* ─── SUCCESS PANEL ─── */
+    .success-panel {
+      display:none; text-align:center; padding:20px 0;
+      animation:fadeUp .6s ease both;
+    }
+    .success-panel.show { display:block; }
+    .success-ring {
+      width:80px; height:80px; border-radius:50%;
+      background:rgba(0,255,136,.08); border:2px solid var(--success);
+      display:flex; align-items:center; justify-content:center;
+      margin:0 auto 22px; font-size:30px;
+      box-shadow:0 0 40px rgba(0,255,136,.12);
+      animation:pop .55s cubic-bezier(.16,1,.3,1) both;
+    }
+    @keyframes pop { from{transform:scale(.5);opacity:0} to{transform:scale(1);opacity:1} }
+    .success-title {
+      font-family:'Bebas Neue',sans-serif; font-size:44px; letter-spacing:2px; margin-bottom:8px;
+    }
+    .success-title em { font-style:normal; color:var(--success); }
+    .success-sub { font-size:14px; color:var(--muted); margin-bottom:28px; line-height:1.7; }
+    .success-detail {
+      background:var(--surface); border:1px solid var(--border);
+      border-radius:12px; padding:18px; margin-bottom:24px; text-align:left;
+      display:flex; flex-direction:column; gap:10px;
+    }
+    .sd-row { display:flex; align-items:center; gap:10px; font-size:13px; }
+    .sd-label { color:var(--muted); min-width:80px; font-family:'Space Mono',monospace; font-size:11px; letter-spacing:1px; text-transform:uppercase; }
+    .sd-value { color:var(--text); font-weight:500; }
+    .btn-home {
+      display:inline-flex; align-items:center; gap:8px;
+      padding:14px 32px; background:var(--accent); color:#0a0a0f;
+      font-family:'DM Sans',sans-serif; font-size:14px; font-weight:700;
+      border:none; border-radius:10px; cursor:none; transition:all .3s;
+    }
+    .btn-home:hover { transform:translateY(-2px); box-shadow:0 12px 30px var(--glow); }
+
+    /* ─── TOAST ─── */
+    #toast {
+      position:fixed; bottom:28px; right:28px; z-index:9999;
+      background:var(--card); border:1px solid var(--border);
+      border-radius:12px; padding:14px 20px;
+      display:flex; align-items:center; gap:10px; font-size:13px;
+      transform:translateY(80px); opacity:0;
+      transition:all .4s cubic-bezier(.16,1,.3,1); pointer-events:none;
+    }
+    #toast.show { transform:translateY(0); opacity:1; }
+    .tdot { width:7px; height:7px; border-radius:50%; background:var(--accent); animation:pulse 1.5s infinite; }
+    #toast.err .tdot { background:var(--accent2); }
+    #toast.err { border-color:rgba(255,71,87,.3); }
+    #toast.ok .tdot { background:var(--success); }
+    #toast.ok { border-color:rgba(0,255,136,.3); }
+
+    @keyframes fadeUp { from{opacity:0;transform:translateY(22px)} to{opacity:1;transform:translateY(0)} }
+
+    /* ─── MOBILE ─── */
+    @media(max-width:900px){
+      nav { padding:16px 24px; }
+      .nav-links { display:none; }
+      .hero-strip { padding:100px 24px 0; }
+      .main-content { padding:0 24px 60px; }
+      .tab-panel.active { grid-template-columns:1fr; }
+      .right-col { order:-1; }
+      .field-grid { grid-template-columns:1fr; }
+      .radio-grid { grid-template-columns:1fr 1fr; }
+      .slots-grid { grid-template-columns:repeat(4,1fr); }
+      .faq-section { padding:0 24px 60px; }
+      .faq-grid { grid-template-columns:1fr; }
+      body { cursor:auto; }
+      #cursor,#cursor-ring { display:none; }
+    }
+    @media(max-width:480px){
+      .tab-pill { padding:10px 16px; font-size:13px; }
+      .trust-stats { grid-template-columns:1fr 1fr; }
+      .slots-grid { grid-template-columns:repeat(3,1fr); }
+    }
+
+    ::-webkit-scrollbar { width:5px; }
+    ::-webkit-scrollbar-track { background:var(--bg); }
+    ::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
+  </style>
+</head>
+<body>
+
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+<div id="toast"><div class="tdot"></div><span id="toast-msg">Done!</span></div>
+<div class="bg-grid"></div>
+<div class="bg-orb orb1"></div>
+<div class="bg-orb orb2"></div>
+<div class="bg-orb orb3"></div>
+
+<!-- ═══ NAVBAR ═══ -->
+<nav>
+  <a href="homepage.html" class="nav-logo">E<span>U</span>P</a>
+  <ul class="nav-links">
+    <li><a href="homepage.html#features">Features</a></li>
+    <li><a href="homepage.html#pricing">Pricing</a></li>
+    <li><a href="bookademo.html" class="active">Contact</a></li>
+  </ul>
+  <div class="nav-cta">
+    <button class="btn-ghost" onclick="window.location='loginpage.html'">Log In</button>
+    <button class="btn-primary-sm" onclick="window.location='signuppage.html'">Get Started →</button>
+  </div>
+</nav>
+
+<!-- ═══ HERO STRIP ═══ -->
+<div class="hero-strip">
+  <div class="hero-tag"><span class="dot"></span> Talk to a Human</div>
+  <h1 class="hero-title">LET'S <em>BUILD</em><br><span class="stroke">TOGETHER</span></h1>
+  <p class="hero-sub">Book a personalized demo or reach out to our sales team — we'll show you exactly how EUP can eliminate prompt guesswork for your team.</p>
+</div>
+
+<!-- ═══ TAB SWITCHER ═══ -->
+<div class="tab-wrap">
+  <div class="tab-pills">
+    <button class="tab-pill active" id="tab-demo" onclick="switchTab('demo')">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+      Book a Demo
+    </button>
+    <button class="tab-pill" id="tab-sales" onclick="switchTab('sales')">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.35 2 2 0 0 1 3.6 1h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 8.9a16 16 0 0 0 6.29 6.29l.75-.76a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92Z"/></svg>
+      Contact Sales
+    </button>
+  </div>
+</div>
+
+<!-- ═══ MAIN CONTENT ═══ -->
+<div class="main-content">
+
+  <!-- ═══ BOOK DEMO PANEL ═══ -->
+  <div class="tab-panel active" id="panel-demo">
+
+    <!-- LEFT: DEMO FORM -->
+    <div class="left-col">
+
+      <!-- Step 1: Your Info -->
+      <div class="form-card" id="demo-step1">
+        <div class="fc-title">YOUR <em>INFO</em></div>
+        <div class="fc-sub">Tell us who you are so we can tailor the demo.</div>
+
+        <div class="field-grid">
+          <div class="form-group" id="fg-dfname">
+            <label class="form-label">First Name</label>
+            <div class="input-wrap">
+              <span class="input-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+              <input type="text" class="form-input" id="d-fname" placeholder="Jane" onfocus="fg('fg-dfname')" onblur="fb('fg-dfname')" oninput="liveVal(this)"/>
+              <span class="input-status" id="ist-dfname"></span>
+            </div>
+          </div>
+          <div class="form-group" id="fg-dlname">
+            <label class="form-label">Last Name</label>
+            <div class="input-wrap">
+              <span class="input-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+              <input type="text" class="form-input" id="d-lname" placeholder="Smith" onfocus="fg('fg-dlname')" onblur="fb('fg-dlname')" oninput="liveVal(this)"/>
+              <span class="input-status" id="ist-dlname"></span>
+            </div>
+          </div>
+          <div class="form-group" id="fg-demail">
+            <label class="form-label">Work Email</label>
+            <div class="input-wrap">
+              <span class="input-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 7 10-7"/></svg></span>
+              <input type="email" class="form-input" id="d-email" placeholder="jane@company.com" onfocus="fg('fg-demail')" onblur="fb('fg-demail')" oninput="valEmail(this,'ist-demail')"/>
+              <span class="input-status" id="ist-demail"></span>
+            </div>
+            <div class="field-err" id="err-demail">⚠ Enter a valid work email</div>
+          </div>
+          <div class="form-group" id="fg-dcomp">
+            <label class="form-label">Company</label>
+            <div class="input-wrap">
+              <span class="input-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 21h18M6 21V7l6-4 6 4v14M9 21v-4h6v4"/></svg></span>
+              <input type="text" class="form-input" id="d-company" placeholder="Acme Corp" onfocus="fg('fg-dcomp')" onblur="fb('fg-dcomp')" oninput="liveVal(this)"/>
+            </div>
+          </div>
+          <div class="form-group full" id="fg-dsize">
+            <label class="form-label">Team Size</label>
+            <div class="input-wrap">
+              <span class="input-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+              <select class="form-select" id="d-size" onfocus="fg('fg-dsize')" onblur="fb('fg-dsize')">
+                <option value="" disabled selected>Select team size...</option>
+                <option>Just me (1)</option>
+                <option>2–10 people</option>
+                <option>11–50 people</option>
+                <option>51–200 people</option>
+                <option>201–1000 people</option>
+                <option>1000+ people</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2: Use Case -->
+      <div class="form-card">
+        <div class="fc-title">YOUR <em>USE CASE</em></div>
+        <div class="fc-sub">What are you hoping to achieve with EUP?</div>
+
+        <div class="radio-grid" id="usecase-grid">
+          <div class="radio-card selected" onclick="pickRadio(this,'usecase-grid')">
+            <span class="radio-icon">⚡</span>
+            <div><div class="radio-label">Faster Outputs</div><div class="radio-desc">Cut iteration time</div></div>
+          </div>
+          <div class="radio-card" onclick="pickRadio(this,'usecase-grid')">
+            <span class="radio-icon">🤝</span>
+            <div><div class="radio-label">Team Alignment</div><div class="radio-desc">Standardize prompts</div></div>
+          </div>
+          <div class="radio-card" onclick="pickRadio(this,'usecase-grid')">
+            <span class="radio-icon">🏗️</span>
+            <div><div class="radio-label">Product Integration</div><div class="radio-desc">Embed via API</div></div>
+          </div>
+          <div class="radio-card" onclick="pickRadio(this,'usecase-grid')">
+            <span class="radio-icon">📊</span>
+            <div><div class="radio-label">Analytics & Ops</div><div class="radio-desc">Track performance</div></div>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-top:18px;margin-bottom:0" id="fg-dnotes">
+          <label class="form-label">Additional Notes <span class="label-opt">optional</span></label>
+          <textarea class="form-textarea" id="d-notes" placeholder="Tell us anything specific you'd like covered in the demo..." onfocus="fg('fg-dnotes')" onblur="fb('fg-dnotes')"></textarea>
+        </div>
+      </div>
+
+      <!-- Step 3: Confirm + Submit -->
+      <div class="form-card" id="demoFormConfirm">
+        <div class="fc-title">ALMOST <em>THERE</em></div>
+        <div class="fc-sub">Review your selected slot and confirm below.</div>
+
+        <div id="slot-confirm" style="background:var(--input-bg);border:1px solid var(--border);border-radius:10px;padding:14px 18px;margin-bottom:20px;font-size:13px;color:var(--muted);">
+          📅 No slot selected yet — pick a date and time on the right →
+        </div>
+
+        <div style="margin-bottom:18px;">
+          <div class="check-row" onclick="toggleCbox('cbox-demo1')">
+            <div class="cbox" id="cbox-demo1"></div>
+            <div class="check-text">I confirm the information above is accurate and I am authorised to book this demo on behalf of my organisation.</div>
+          </div>
+        </div>
+        <div style="margin-bottom:20px;">
+          <div class="check-row" onclick="toggleCbox('cbox-demo2')">
+            <div class="cbox" id="cbox-demo2"></div>
+            <div class="check-text">I agree to the <a href="privacypage.html">Privacy Policy</a>. EUP may contact me about this request.</div>
+          </div>
+        </div>
+
+        <button class="btn-submit" id="demoSubmitBtn" onclick="submitDemo()">
+          <span class="btxt">📅 Confirm Demo Booking</span>
+          <div class="spinner"></div>
+        </button>
+
+        <!-- SUCCESS -->
+        <div class="success-panel" id="demoSuccess">
+          <div class="success-ring">📅</div>
+          <h3 class="success-title">DEMO <em>BOOKED!</em></h3>
+          <p class="success-sub">A calendar invite has been sent to your email. Our team is excited to meet you!</p>
+          <div class="success-detail" id="demoSuccessDetail"></div>
+          <button class="btn-home" onclick="window.location='homepage.html'">
+            Back to Home
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: CALENDAR + INFO -->
+    <div class="right-col">
+
+      <div class="info-card">
+        <div class="info-title">PICK A SLOT</div>
+
+        <!-- Calendar -->
+        <div class="cal-header">
+          <div class="cal-month" id="calMonthLabel">March 2026</div>
+          <div class="cal-nav">
+            <button class="cal-btn" onclick="changeMonth(-1)">‹</button>
+            <button class="cal-btn" onclick="changeMonth(1)">›</button>
+          </div>
+        </div>
+        <div class="cal-grid" id="calGrid"></div>
+
+        <!-- Time Slots -->
+        <div class="slots-label">AVAILABLE TIMES <span style="color:var(--accent3);font-size:9px;">● = slots</span></div>
+        <div class="slots-grid" id="slotsGrid">
+          <div style="grid-column:1/-1;font-size:12px;color:var(--muted);text-align:center;padding:10px 0;">Select a date to see available times</div>
+        </div>
+      </div>
+
+      <!-- Trust stats -->
+      <div class="trust-card">
+        <div class="trust-title">// Why teams love demos</div>
+        <div class="trust-stats">
+          <div class="tstat"><span class="tstat-num">30<em>min</em></span><div class="tstat-lbl">Focused session</div></div>
+          <div class="tstat"><span class="tstat-num">1<em>:1</em></span><div class="tstat-lbl">Personalised</div></div>
+          <div class="tstat"><span class="tstat-num">98<em>%</em></span><div class="tstat-lbl">Book conversion</div></div>
+          <div class="tstat"><span class="tstat-num">24<em>h</em></span><div class="tstat-lbl">Response time</div></div>
+        </div>
+      </div>
+
+      <!-- Mini testimonial -->
+      <div class="mini-testimonial">
+        <div class="quote-mark">"</div>
+        <div class="mini-stars">★★★★★</div>
+        <p class="mini-text">"The demo was 30 minutes but it changed how our entire engineering team thinks about working with AI. We signed up the same day."</p>
+        <div class="mini-author">
+          <div class="mini-avatar">RK</div>
+          <div>
+            <div class="mini-name">Rohan Kapoor</div>
+            <div class="mini-role">CTO, BuildFast.ai</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ CONTACT SALES PANEL ═══ -->
+  <div class="tab-panel" id="panel-sales">
+
+    <!-- LEFT: SALES FORM -->
+    <div class="left-col">
+
+      <div class="form-card">
+        <div class="fc-title">GET IN <em>TOUCH</em></div>
+        <div class="fc-sub">Fill in the details and our sales team will respond within 24 hours.</div>
+
+        <div class="field-grid">
+          <div class="form-group" id="fg-sfname">
+            <label class="form-label">First Name</label>
+            <div class="input-wrap">
+              <span class="input-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+              <input type="text" class="form-input" id="s-fname" placeholder="Alex" onfocus="fg('fg-sfname')" onblur="fb('fg-sfname')" oninput="liveVal(this)"/>
+            </div>
+          </div>
+          <div class="form-group" id="fg-slname">
+            <label class="form-label">Last Name</label>
+            <div class="input-wrap">
+              <span class="input-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+              <input type="text" class="form-input" id="s-lname" placeholder="Chen" onfocus="fg('fg-slname')" onblur="fb('fg-slname')" oninput="liveVal(this)"/>
+            </div>
+          </div>
+          <div class="form-group" id="fg-semail">
+            <label class="form-label">Work Email</label>
+            <div class="input-wrap">
+              <span class="input-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 7 10-7"/></svg></span>
+              <input type="email" class="form-input" id="s-email" placeholder="alex@enterprise.com" onfocus="fg('fg-semail')" onblur="fb('fg-semail')" oninput="valEmail(this,'ist-semail')"/>
+              <span class="input-status" id="ist-semail"></span>
+            </div>
+            <div class="field-err" id="err-semail">⚠ Enter a valid work email</div>
+          </div>
+          <div class="form-group" id="fg-sphone">
+            <label class="form-label">Phone <span class="label-opt">optional</span></label>
+            <div class="input-wrap">
+              <span class="input-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.35 2 2 0 0 1 3.6 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 8.91a16 16 0 0 0 6 6l.76-.75a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92Z"/></svg></span>
+              <input type="tel" class="form-input" id="s-phone" placeholder="+1 (555) 000-0000" onfocus="fg('fg-sphone')" onblur="fb('fg-sphone')"/>
+            </div>
+          </div>
+          <div class="form-group" id="fg-scomp">
+            <label class="form-label">Company</label>
+            <div class="input-wrap">
+              <span class="input-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 21h18M6 21V7l6-4 6 4v14M9 21v-4h6v4"/></svg></span>
+              <input type="text" class="form-input" id="s-company" placeholder="Enterprise Corp" onfocus="fg('fg-scomp')" onblur="fb('fg-scomp')"/>
+            </div>
+          </div>
+          <div class="form-group" id="fg-srev">
+            <label class="form-label">Annual Revenue</label>
+            <div class="input-wrap">
+              <span class="input-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span>
+              <select class="form-select" id="s-rev" onfocus="fg('fg-srev')" onblur="fb('fg-srev')">
+                <option value="" disabled selected>Select range...</option>
+                <option>Under $1M</option>
+                <option>$1M – $10M</option>
+                <option>$10M – $50M</option>
+                <option>$50M – $250M</option>
+                <option>$250M+</option>
+                <option>Prefer not to say</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group full" id="fg-sinterest">
+            <label class="form-label">I'm interested in</label>
+            <div class="radio-grid" id="interest-grid">
+              <div class="radio-card selected" onclick="pickRadio(this,'interest-grid')">
+                <span class="radio-icon">🏢</span>
+                <div><div class="radio-label">Enterprise Plan</div><div class="radio-desc">Custom seats & SSO</div></div>
+              </div>
+              <div class="radio-card" onclick="pickRadio(this,'interest-grid')">
+                <span class="radio-icon">🔗</span>
+                <div><div class="radio-label">API Access</div><div class="radio-desc">Integrate into product</div></div>
+              </div>
+              <div class="radio-card" onclick="pickRadio(this,'interest-grid')">
+                <span class="radio-icon">🤝</span>
+                <div><div class="radio-label">Partnership</div><div class="radio-desc">Reseller / agency</div></div>
+              </div>
+              <div class="radio-card" onclick="pickRadio(this,'interest-grid')">
+                <span class="radio-icon">🛠️</span>
+                <div><div class="radio-label">Custom Build</div><div class="radio-desc">Bespoke solution</div></div>
+              </div>
+            </div>
+          </div>
+          <div class="form-group full" id="fg-smsg">
+            <label class="form-label">Message</label>
+            <textarea class="form-textarea" id="s-msg" placeholder="Tell us about your needs, timeline, or any specific questions for our sales team..." style="min-height:120px;" onfocus="fg('fg-smsg')" onblur="fb('fg-smsg')"></textarea>
+          </div>
+          <div class="form-group full">
+            <label class="form-label">How did you hear about us? <span class="label-opt">optional</span></label>
+            <div class="input-wrap">
+              <span class="input-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></span>
+              <select class="form-select" onfocus="fg(null)" onblur="fb(null)">
+                <option value="" disabled selected>Select source...</option>
+                <option>Google Search</option>
+                <option>LinkedIn</option>
+                <option>Twitter / X</option>
+                <option>A colleague / friend</option>
+                <option>Product Hunt</option>
+                <option>Newsletter</option>
+                <option>Other</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-bottom:20px;">
+          <div class="check-row" onclick="toggleCbox('cbox-sales')">
+            <div class="cbox" id="cbox-sales"></div>
+            <div class="check-text">I agree to the <a href="privacypage.html">Privacy Policy</a>. EUP may use my information to respond to this inquiry.</div>
+          </div>
+        </div>
+
+        <button class="btn-submit" id="salesSubmitBtn" onclick="submitSales()">
+          <span class="btxt">Send to Sales Team</span>
+          <svg class="barr" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          <div class="spinner"></div>
+        </button>
+
+        <!-- SUCCESS -->
+        <div class="success-panel" id="salesSuccess">
+          <div class="success-ring">🚀</div>
+          <h3 class="success-title">MESSAGE <em>SENT!</em></h3>
+          <p class="success-sub">Our sales team will reach out within 24 hours.<br>Keep an eye on your inbox!</p>
+          <div class="success-detail">
+            <div class="sd-row"><span class="sd-label">Response</span><span class="sd-value">Within 24 hours on business days</span></div>
+            <div class="sd-row"><span class="sd-label">Contact</span><span class="sd-value">sales@eup.io</span></div>
+            <div class="sd-row"><span class="sd-label">Reference</span><span class="sd-value" id="salesRef">#EUP-0000</span></div>
+          </div>
+          <button class="btn-home" onclick="window.location='homepage.html'">
+            Back to Home
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: TEAM + INFO -->
+    <div class="right-col">
+
+      <div class="info-card" style="--accent3: #e8ff47;">
+        <div class="info-title" style="color:var(--accent)">OUR SALES TEAM</div>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.6;">Real humans, no bots. We'll match you with the right person for your use case.</p>
+        <div class="team-card" style="background:transparent;border:none;padding:0;">
+          <div class="team-members">
+            <div class="team-member">
+              <div class="member-av">👩‍💼</div>
+              <div class="member-info">
+                <div class="member-name">Priya Nair</div>
+                <div class="member-role">Enterprise Sales Lead</div>
+              </div>
+              <span class="member-badge badge-online">● Online</span>
+            </div>
+            <div class="team-member">
+              <div class="member-av">👨‍💻</div>
+              <div class="member-info">
+                <div class="member-name">Marcus Webb</div>
+                <div class="member-role">Solutions Engineer</div>
+              </div>
+              <span class="member-badge badge-online">● Online</span>
+            </div>
+            <div class="team-member">
+              <div class="member-av">👩‍🔬</div>
+              <div class="member-info">
+                <div class="member-name">Seo-Yeon Park</div>
+                <div class="member-role">API Partnerships</div>
+              </div>
+              <span class="member-badge badge-busy">◐ In a call</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="trust-card">
+        <div class="trust-title">// Contact channels</div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--card);border:1px solid var(--border);border-radius:10px;font-size:13px;cursor:none;transition:all .3s;" onmouseenter="this.style.borderColor='rgba(232,255,71,.25)'" onmouseleave="this.style.borderColor='var(--border)'" onclick="toast('Opening email client...')">
+            <span style="font-size:18px;">📧</span>
+            <div><div style="font-weight:600;">Email</div><div style="color:var(--muted);font-size:12px;">sales@eup.io</div></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--card);border:1px solid var(--border);border-radius:10px;font-size:13px;cursor:none;transition:all .3s;" onmouseenter="this.style.borderColor='rgba(0,210,255,.25)'" onmouseleave="this.style.borderColor='var(--border)'" onclick="toast('Opening live chat...')">
+            <span style="font-size:18px;">💬</span>
+            <div><div style="font-weight:600;">Live Chat</div><div style="color:var(--muted);font-size:12px;">Available Mon–Fri, 9am–6pm IST</div></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--card);border:1px solid var(--border);border-radius:10px;font-size:13px;cursor:none;transition:all .3s;" onmouseenter="this.style.borderColor='rgba(255,71,87,.25)'" onmouseleave="this.style.borderColor='var(--border)'" onclick="toast('Opening LinkedIn...')">
+            <span style="font-size:18px;">💼</span>
+            <div><div style="font-weight:600;">LinkedIn</div><div style="color:var(--muted);font-size:12px;">linkedin.com/company/eup-io</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mini-testimonial">
+        <div class="quote-mark">"</div>
+        <div class="mini-stars">★★★★★</div>
+        <p class="mini-text">"The sales team actually listened. No generic pitch — they mapped EUP exactly to our workflow. Closed in two days."</p>
+        <div class="mini-author">
+          <div class="mini-avatar">TW</div>
+          <div>
+            <div class="mini-name">Tanya Wilson</div>
+            <div class="mini-role">VP Engineering, DataStream</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══ FAQ ═══ -->
+<div class="faq-section">
+  <h2 class="faq-title">COMMON <em>QUESTIONS</em></h2>
+  <div class="faq-grid" id="faqGrid">
+    <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">How long is a typical demo? <span class="faq-icon">+</span></div><div class="faq-a">Our standard demo runs 30 minutes. For enterprise accounts with complex requirements, we can extend to 60 minutes to cover integrations, security, and custom workflows in depth.</div></div>
+    <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">Who should attend the demo? <span class="faq-icon">+</span></div><div class="faq-a">Ideally the decision-maker and at least one technical stakeholder. We'll tailor the session to cover both product value and technical implementation so everyone walks away with clarity.</div></div>
+    <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">Is there a minimum contract for Enterprise? <span class="faq-icon">+</span></div><div class="faq-a">Enterprise contracts start at 10 seats with annual billing. We offer flexible terms including monthly pilots for teams that want to evaluate before committing. Our sales team will find what works best for you.</div></div>
+    <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">Can I see a live demo before booking? <span class="faq-icon">+</span></div><div class="faq-a">Yes! Check out our interactive product tour at eup.io/tour — it walks through the core builder, prompt library, and analytics dashboard in about 5 minutes with no sign-up required.</div></div>
+    <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">Do you support on-premise deployment? <span class="faq-icon">+</span></div><div class="faq-a">Yes, for enterprise customers we offer private cloud and on-premise deployment options with full SOC 2 Type II compliance, SSO (SAML/OIDC), and custom data residency agreements.</div></div>
+    <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">How quickly can my team get onboarded? <span class="faq-icon">+</span></div><div class="faq-a">Most teams are fully onboarded within 1 week. We provide a dedicated onboarding specialist, documentation, and async Slack support during your first 30 days — included in all paid plans.</div></div>
+  </div>
+</div>
+
+<script>
+  const API_BASE = 'http://127.0.0.1:5001/api/v1';
+
+  // ── CURSOR ──
+  const cur = document.getElementById('cursor');
+  const ring = document.getElementById('cursor-ring');
+  document.addEventListener('mousemove', e => {
+    cur.style.left = e.clientX+'px'; cur.style.top = e.clientY+'px';
+    setTimeout(() => { ring.style.left = e.clientX+'px'; ring.style.top = e.clientY+'px'; }, 55);
+  });
+
+  // ── TOAST ──
+  let _tt;
+  function toast(msg, type='') {
+    const el = document.getElementById('toast');
+    document.getElementById('toast-msg').textContent = msg;
+    el.className = 'show ' + type;
+    clearTimeout(_tt); _tt = setTimeout(() => el.classList.remove('show'), 2800);
+  }
+
+  // ── FOCUS HELPERS ──
+  function fg(id) { if(id) document.getElementById(id)?.classList.add('focused'); }
+  function fb(id) { if(id) document.getElementById(id)?.classList.remove('focused'); }
+
+  // ── LIVE VALIDATION ──
+  function liveVal(inp) {
+    inp.className = 'form-input ' + (inp.value.trim().length >= 2 ? 'valid' : '');
+  }
+  function valEmail(inp, stId) {
+    const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(inp.value);
+    inp.className = 'form-input ' + (inp.value ? (ok ? 'valid' : 'invalid') : '');
+    const st = document.getElementById(stId);
+    if (st) { st.textContent = inp.value ? (ok ? '✓' : '✗') : ''; st.style.color = ok ? 'var(--success)' : 'var(--accent2)'; st.classList.toggle('show', !!inp.value); }
+    const errKey = stId.replace('ist-','err-');
+    const errEl = document.getElementById(errKey);
+    if (errEl) errEl.classList.toggle('show', !!inp.value && !ok);
+  }
+
+  // ── RADIO CARDS ──
+  function pickRadio(el, gridId) {
+    document.querySelectorAll('#'+gridId+' .radio-card').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+  }
+
+  // ── CHECKBOX TOGGLE ──
+  function toggleCbox(id) { document.getElementById(id).classList.toggle('checked'); }
+
+  // ── TAB SWITCH ──
+  function switchTab(tab) {
+    document.querySelectorAll('.tab-pill').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('tab-'+tab).classList.add('active');
+    document.getElementById('panel-'+tab).classList.add('active');
+  }
+
+  // ── FAQ ──
+  function toggleFaq(el) {
+    const item = el.parentElement;
+    const isOpen = item.classList.contains('open');
+    document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+    if (!isOpen) item.classList.add('open');
+  }
+
+  // ──────────────────── CALENDAR ────────────────────
+  let calDate = new Date(2026, 2, 1); // March 2026
+  let selectedDate = null;
+  let selectedSlot = null;
+
+  const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const DAYS = ['Su','Mo','Tu','We','Th','Fr','Sa'];
+
+  // Slots available on specific days (day of month → time slots)
+  const SLOT_MAP = {
+    9:  ['9:00 AM','10:00 AM','2:00 PM'],
+    10: ['9:30 AM','11:00 AM','3:00 PM','4:30 PM'],
+    11: ['10:00 AM','1:00 PM'],
+    12: ['9:00 AM','11:30 AM','2:30 PM'],
+    16: ['9:00 AM','10:30 AM','2:00 PM','3:30 PM'],
+    17: ['11:00 AM','1:30 PM','4:00 PM'],
+    18: ['9:30 AM','10:00 AM','2:00 PM'],
+    19: ['10:00 AM','3:00 PM'],
+    23: ['9:00 AM','11:00 AM','1:00 PM','4:00 PM'],
+    24: ['9:30 AM','2:00 PM','3:30 PM'],
+    25: ['10:00 AM','1:30 PM'],
+    26: ['9:00 AM','11:30 AM','2:00 PM'],
+    30: ['10:00 AM','2:00 PM','4:00 PM'],
+    31: ['9:00 AM','1:00 PM'],
+  };
+  const TAKEN_SLOTS = {'9:30 AM':true, '11:00 AM':true};
+
+  function renderCalendar() {
+    const grid = document.getElementById('calGrid');
+    const label = document.getElementById('calMonthLabel');
+    label.textContent = MONTHS[calDate.getMonth()] + ' ' + calDate.getFullYear();
+
+    const firstDay = new Date(calDate.getFullYear(), calDate.getMonth(), 1).getDay();
+    const daysInMonth = new Date(calDate.getFullYear(), calDate.getMonth()+1, 0).getDate();
+    const today = new Date();
+
+    grid.innerHTML = '';
+    DAYS.forEach(d => {
+      const dn = document.createElement('div');
+      dn.className = 'cal-day-name'; dn.textContent = d;
+      grid.appendChild(dn);
+    });
+
+    for (let i = 0; i < firstDay; i++) {
+      const empty = document.createElement('div');
+      empty.className = 'cal-day empty'; grid.appendChild(empty);
+    }
+
+    for (let d = 1; d <= daysInMonth; d++) {
+      const cell = document.createElement('div');
+      cell.className = 'cal-day';
+      cell.textContent = d;
+
+      const isToday = (calDate.getFullYear() === today.getFullYear() &&
+                       calDate.getMonth() === today.getMonth() && d === today.getDate());
+      const isPast = new Date(calDate.getFullYear(), calDate.getMonth(), d) < new Date(today.getFullYear(), today.getMonth(), today.getDate());
+      const hasSlots = !!SLOT_MAP[d];
+
+      if (isToday) cell.classList.add('today');
+      if (isPast) cell.classList.add('past');
+      if (hasSlots && !isPast) cell.classList.add('has-slot');
+      if (selectedDate === d && calDate.getMonth() === (selectedDate?.month ?? calDate.getMonth())) cell.classList.add('selected');
+
+      if (!isPast && hasSlots) {
+        cell.onclick = () => selectDate(d);
+      } else if (!isPast) {
+        cell.style.opacity = '.45';
+      }
+
+      grid.appendChild(cell);
+    }
+  }
+
+  function selectDate(d) {
+    selectedDate = d;
+    selectedSlot = null;
+    updateSlotConfirm();
+    renderCalendar();
+    renderSlots(d);
+  }
+
+  function renderSlots(d) {
+    const grid = document.getElementById('slotsGrid');
+    const slots = SLOT_MAP[d] || [];
+    grid.innerHTML = '';
+    if (slots.length === 0) {
+      grid.innerHTML = '<div style="grid-column:1/-1;font-size:12px;color:var(--muted);text-align:center;padding:10px 0;">No slots available this day</div>';
+      return;
+    }
+    slots.forEach(time => {
+      const el = document.createElement('div');
+      el.className = 'slot' + (TAKEN_SLOTS[time] ? ' taken' : '');
+      el.innerHTML = time + '<span class="slot-tz">IST</span>';
+      if (!TAKEN_SLOTS[time]) {
+        el.onclick = () => {
+          document.querySelectorAll('.slot').forEach(s => s.classList.remove('selected'));
+          el.classList.add('selected');
+          selectedSlot = time;
+          updateSlotConfirm();
+          toast('Slot selected: '+time+' IST ✓', 'ok');
+        };
+      }
+      grid.appendChild(el);
+    });
+  }
+
+  function updateSlotConfirm() {
+    const el = document.getElementById('slot-confirm');
+    if (selectedDate && selectedSlot) {
+      const dateStr = MONTHS[calDate.getMonth()] + ' ' + selectedDate + ', ' + calDate.getFullYear();
+      el.style.borderColor = 'rgba(232,255,71,.35)';
+      el.style.background = 'rgba(232,255,71,.04)';
+      el.style.color = 'var(--text)';
+      el.innerHTML = `<span style="color:var(--accent)">📅</span> <strong>${dateStr}</strong> at <strong>${selectedSlot} IST</strong> — 30-min intro demo`;
+    } else if (selectedDate) {
+      el.style.borderColor = 'var(--border)';
+      el.style.background = 'var(--input-bg)';
+      el.style.color = 'var(--muted)';
+      el.textContent = '⏰ Date selected — now pick a time above';
+    } else {
+      el.style.borderColor = 'var(--border)';
+      el.style.background = 'var(--input-bg)';
+      el.style.color = 'var(--muted)';
+      el.textContent = '📅 No slot selected yet — pick a date and time on the right →';
+    }
+  }
+
+  function changeMonth(dir) {
+    calDate.setMonth(calDate.getMonth() + dir);
+    selectedDate = null; selectedSlot = null;
+    updateSlotConfirm();
+    document.getElementById('slotsGrid').innerHTML = '<div style="grid-column:1/-1;font-size:12px;color:var(--muted);text-align:center;padding:10px 0;">Select a date to see available times</div>';
+    renderCalendar();
+  }
+
+  renderCalendar();
+
+  // ── DEMO SUBMIT ──
+  async function submitDemo() {
+    const fname = document.getElementById('d-fname').value.trim();
+    const lname = document.getElementById('d-lname').value.trim();
+    const email = document.getElementById('d-email').value.trim();
+    const company = document.getElementById('d-company').value.trim();
+    const size  = document.getElementById('d-size').value;
+    const notes = document.getElementById('d-notes').value.trim();
+    const useCase = document.querySelector('#usecase-grid .radio-card.selected .radio-label')?.textContent || '';
+    const terms = document.getElementById('cbox-demo1').classList.contains('checked');
+    const priv  = document.getElementById('cbox-demo2').classList.contains('checked');
+
+    if (!fname) { toast('Enter your first name', 'err'); return; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { toast('Enter a valid work email', 'err'); return; }
+    if (!size) { toast('Please select your team size', 'err'); return; }
+    if (!selectedDate || !selectedSlot) { toast('Please pick a date and time slot', 'err'); return; }
+    if (!terms || !priv) { toast('Please accept both checkboxes', 'err'); return; }
+
+    const btn = document.getElementById('demoSubmitBtn');
+    btn.classList.add('loading'); toast('Booking your demo...');
+
+    try {
+      const dateStr = MONTHS[calDate.getMonth()] + ' ' + selectedDate + ', ' + calDate.getFullYear();
+      const res = await fetch(`${API_BASE}/forms/book-demo`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          first_name: fname,
+          last_name: lname,
+          email,
+          company,
+          team_size: size,
+          use_case: useCase,
+          notes,
+          slot_date: dateStr,
+          slot_time: `${selectedSlot} IST`
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.message || 'Unable to book demo');
+      }
+
+      btn.classList.remove('loading');
+      btn.style.display = 'none';
+      document.getElementById('demoSuccessDetail').innerHTML = `
+        <div class="sd-row"><span class="sd-label">Date</span><span class="sd-value">${dateStr}</span></div>
+        <div class="sd-row"><span class="sd-label">Time</span><span class="sd-value">${selectedSlot} IST (30 min)</span></div>
+        <div class="sd-row"><span class="sd-label">Email</span><span class="sd-value">${email}</span></div>
+        <div class="sd-row"><span class="sd-label">Ref</span><span class="sd-value">#EUP-DEMO-${Math.floor(Math.random()*9000+1000)}</span></div>
+      `;
+      document.getElementById('demoSuccess').classList.add('show');
+      toast('Demo booked! 🎉 Check your email', 'ok');
+      window.scrollTo({ top: document.getElementById('demoFormConfirm').offsetTop - 100, behavior: 'smooth' });
+    } catch (err) {
+      btn.classList.remove('loading');
+      toast(err.message || 'Unable to book demo right now', 'err');
+    }
+  }
+
+  // ── SALES SUBMIT ──
+  async function submitSales() {
+    const fname = document.getElementById('s-fname').value.trim();
+    const lname = document.getElementById('s-lname').value.trim();
+    const email = document.getElementById('s-email').value.trim();
+    const phone = document.getElementById('s-phone').value.trim();
+    const comp  = document.getElementById('s-company').value.trim();
+    const revenue = document.getElementById('s-rev').value;
+    const interest = document.querySelector('#interest-grid .radio-card.selected .radio-label')?.textContent || '';
+    const msg   = document.getElementById('s-msg').value.trim();
+    const terms = document.getElementById('cbox-sales').classList.contains('checked');
+
+    if (!fname) { toast('Enter your first name', 'err'); return; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { toast('Enter a valid work email', 'err'); return; }
+    if (!comp) { toast('Enter your company name', 'err'); return; }
+    if (!msg) { toast('Please include a message for our team', 'err'); return; }
+    if (!terms) { toast('Please accept the Privacy Policy', 'err'); return; }
+
+    const btn = document.getElementById('salesSubmitBtn');
+    btn.classList.add('loading'); toast('Sending to sales team...');
+
+    try {
+      const res = await fetch(`${API_BASE}/forms/contact-sales`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          first_name: fname,
+          last_name: lname,
+          email,
+          phone,
+          company: comp,
+          revenue,
+          interest,
+          message: msg
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.message || 'Unable to send request');
+      }
+
+      btn.classList.remove('loading'); btn.style.display = 'none';
+      const ref = '#EUP-' + Math.floor(Math.random()*90000+10000);
+      document.getElementById('salesRef').textContent = ref;
+      document.getElementById('salesSuccess').classList.add('show');
+      toast('Message sent! We\'ll be in touch within 24h 🚀', 'ok');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch (err) {
+      btn.classList.remove('loading');
+      toast(err.message || 'Unable to contact sales right now', 'err');
+    }
+  }
+</script>
+</body>
+</html>
