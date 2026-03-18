@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>EUP — Create Account</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,300&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #0a0a0f;
+      --surface: #111118;
+      --card: #16161f;
+      --accent: #e8ff47;
+      --accent2: #ff4757;
+      --accent3: #00d2ff;
+      --success: #00ff88;
+      --text: #f0f0f8;
+      --muted: #6b6b8a;
+      --border: rgba(255,255,255,0.07);
+      --glow: rgba(232,255,71,0.15);
+      --input-bg: rgba(255,255,255,0.03);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      cursor: none;
+      overflow-x: hidden;
+    }
+
+    /* ── CURSOR ── */
+    #cursor {
+      width: 10px; height: 10px;
+      background: var(--accent); border-radius: 50%;
+      position: fixed; top: 0; left: 0;
+      pointer-events: none; z-index: 9999;
+      transform: translate(-50%,-50%);
+      transition: transform 0.08s ease;
+    }
+    #cursor-ring {
+      width: 34px; height: 34px;
+      border: 1.5px solid var(--accent); border-radius: 50%;
+      position: fixed; top: 0; left: 0;
+      pointer-events: none; z-index: 9998;
+      transform: translate(-50%,-50%);
+      transition: all 0.18s ease; opacity: 0.5;
+    }
+    body:has(button:hover) #cursor-ring,
+    body:has(a:hover) #cursor-ring,
+    body:has(input:focus) #cursor-ring,
+    body:has(select:focus) #cursor-ring {
+      width: 52px; height: 52px;
+      border-color: var(--accent3); opacity: 1;
+    }
+
+    /* ── NOISE ── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none; z-index: 1; opacity: 0.4;
+    }
+
+    /* ── BACK LINK ── */
+    .back-link {
+      position: fixed; top: 28px; left: 40px; z-index: 200;
+      font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase;
+      color: var(--muted); text-decoration: none;
+      display: flex; align-items: center; gap: 6px;
+      font-family: 'Space Mono', monospace;
+      transition: color 0.3s;
+    }
+    .back-link:hover { color: var(--text); }
+    .back-link svg { transition: transform 0.3s; }
+    .back-link:hover svg { transform: translateX(-3px); }
+
+    .login-link {
+      position: fixed; top: 28px; right: 40px; z-index: 200;
+      font-size: 12px; letter-spacing: 1px;
+      color: var(--muted); text-decoration: none;
+      font-family: 'Space Mono', monospace;
+      transition: color 0.3s;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .login-link span { color: var(--accent); }
+    .login-link:hover { color: var(--text); }
+
+    /* ── MAIN LAYOUT ── */
+    .page-wrap {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 100px 24px 80px;
+      position: relative;
+    }
+
+    /* ── BG ELEMENTS ── */
+    .bg-orb {
+      position: fixed; border-radius: 50%;
+      filter: blur(130px); pointer-events: none; z-index: 0;
+    }
+    .orb-a { width: 600px; height: 600px; background: rgba(232,255,71,0.05); top: -200px; right: -150px; animation: orbA 14s ease-in-out infinite; }
+    .orb-b { width: 400px; height: 400px; background: rgba(0,210,255,0.04); bottom: -100px; left: -100px; animation: orbA 18s ease-in-out infinite reverse; }
+    .orb-c { width: 300px; height: 300px; background: rgba(255,71,87,0.04); top: 50%; left: 30%; animation: orbA 11s ease-in-out infinite; }
+    @keyframes orbA {
+      0%,100% { transform: translate(0,0) scale(1); }
+      50% { transform: translate(25px,-25px) scale(1.08); }
+    }
+
+    .bg-grid {
+      position: fixed; inset: 0; z-index: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+      background-size: 56px 56px;
+      pointer-events: none;
+    }
+
+    /* ── PROGRESS STEPPER ── */
+    .stepper {
+      display: flex; align-items: center; gap: 0;
+      margin-bottom: 48px; position: relative; z-index: 2;
+      animation: fadeUp 0.5s 0.1s ease both;
+    }
+    .step-item {
+      display: flex; flex-direction: column; align-items: center; gap: 8px;
+    }
+    .step-circle {
+      width: 40px; height: 40px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Bebas Neue', sans-serif; font-size: 16px; letter-spacing: 1px;
+      border: 1.5px solid var(--border);
+      background: var(--card); color: var(--muted);
+      transition: all 0.4s cubic-bezier(0.16,1,0.3,1);
+      position: relative;
+    }
+    .step-circle.active {
+      border-color: var(--accent); color: var(--accent);
+      box-shadow: 0 0 20px var(--glow);
+      background: rgba(232,255,71,0.08);
+    }
+    .step-circle.done {
+      background: var(--accent); border-color: var(--accent); color: #0a0a0f;
+    }
+    .step-label {
+      font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase;
+      color: var(--muted); font-family: 'Space Mono', monospace;
+      white-space: nowrap;
+    }
+    .step-label.active { color: var(--accent); }
+    .step-connector {
+      width: 80px; height: 1px;
+      background: var(--border); margin-bottom: 20px;
+      position: relative; overflow: hidden;
+    }
+    .step-connector .fill {
+      position: absolute; inset: 0;
+      background: var(--accent); transform: scaleX(0);
+      transform-origin: left; transition: transform 0.5s ease;
+    }
+    .step-connector.done .fill { transform: scaleX(1); }
+
+    /* ── CARD ── */
+    .signup-card {
+      width: 100%; max-width: 520px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px; padding: 48px;
+      position: relative; z-index: 2;
+      animation: fadeUp 0.6s 0.2s ease both;
+    }
+
+    .card-header { margin-bottom: 36px; }
+    .card-tag {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 4px 12px; border: 1px solid rgba(232,255,71,0.2);
+      border-radius: 100px; font-size: 10px; letter-spacing: 2px;
+      text-transform: uppercase; color: var(--accent);
+      background: rgba(232,255,71,0.04); margin-bottom: 16px;
+      font-family: 'Space Mono', monospace;
+    }
+    .card-tag .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.4} }
+
+    .card-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 44px; letter-spacing: 2px; line-height: 1;
+      margin-bottom: 8px;
+    }
+    .card-title em { font-style: normal; color: var(--accent); }
+    .card-sub { font-size: 14px; color: var(--muted); }
+
+    /* ── STEP PANELS ── */
+    .step-panel {
+      display: none;
+      animation: panelIn 0.4s cubic-bezier(0.16,1,0.3,1) both;
+    }
+    .step-panel.active { display: block; }
+    @keyframes panelIn {
+      from { opacity: 0; transform: translateX(20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes panelBack {
+      from { opacity: 0; transform: translateX(-20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    .step-panel.back { animation: panelBack 0.4s cubic-bezier(0.16,1,0.3,1) both; }
+
+    /* ── SOCIAL ── */
+    .social-row {
+      display: flex; gap: 10px; margin-bottom: 24px;
+    }
+    .social-btn {
+      flex: 1; padding: 11px 14px;
+      background: var(--input-bg); border: 1px solid var(--border);
+      border-radius: 10px; color: var(--text);
+      font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500;
+      cursor: none; display: flex; align-items: center; justify-content: center; gap: 8px;
+      transition: all 0.3s;
+    }
+    .social-btn:hover { border-color: rgba(255,255,255,0.18); background: rgba(255,255,255,0.05); transform: translateY(-2px); }
+
+    .divider {
+      display: flex; align-items: center; gap: 12px; margin-bottom: 24px;
+    }
+    .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+    .divider span {
+      font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+      color: var(--muted); font-family: 'Space Mono', monospace;
+    }
+
+    /* ── FORM FIELDS ── */
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .form-group { margin-bottom: 18px; }
+
+    .form-label {
+      display: flex; align-items: center; justify-content: space-between;
+      font-size: 11px; font-weight: 500; letter-spacing: 1px;
+      text-transform: uppercase; color: var(--muted); margin-bottom: 8px;
+      font-family: 'Space Mono', monospace; transition: color 0.3s;
+    }
+    .form-group.focused .form-label { color: var(--accent); }
+    .label-hint { font-size: 10px; letter-spacing: 0; text-transform: none; color: var(--muted); opacity: 0.6; }
+
+    .input-wrap { position: relative; }
+    .input-icon {
+      position: absolute; left: 14px; top: 50%;
+      transform: translateY(-50%); color: var(--muted);
+      pointer-events: none; transition: color 0.3s;
+    }
+    .form-group.focused .input-icon { color: var(--accent); }
+
+    .form-input {
+      width: 100%; padding: 13px 14px 13px 42px;
+      background: var(--input-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px; color: var(--text);
+      font-family: 'DM Sans', sans-serif; font-size: 14px;
+      outline: none; transition: all 0.3s; cursor: text;
+    }
+    .form-input::placeholder { color: var(--muted); font-size: 13px; }
+    .form-input:focus {
+      border-color: var(--accent);
+      background: rgba(232,255,71,0.025);
+      box-shadow: 0 0 0 3px rgba(232,255,71,0.07);
+    }
+    .form-input.valid { border-color: rgba(0,255,136,0.4); }
+    .form-input.invalid { border-color: rgba(255,71,87,0.45); }
+
+    .input-status {
+      position: absolute; right: 14px; top: 50%;
+      transform: translateY(-50%); font-size: 14px;
+      pointer-events: none; opacity: 0; transition: opacity 0.3s;
+    }
+    .input-status.show { opacity: 1; }
+
+    .pass-toggle {
+      position: absolute; right: 14px; top: 50%;
+      transform: translateY(-50%);
+      background: none; border: none; color: var(--muted);
+      cursor: none; padding: 4px; transition: color 0.3s;
+    }
+    .pass-toggle:hover { color: var(--text); }
+
+    .field-msg {
+      font-size: 11px; margin-top: 6px;
+      font-family: 'Space Mono', monospace;
+      display: flex; align-items: center; gap: 5px;
+      opacity: 0; transform: translateY(-4px);
+      transition: all 0.3s; pointer-events: none;
+    }
+    .field-msg.show { opacity: 1; transform: translateY(0); }
+    .field-msg.err { color: var(--accent2); }
+    .field-msg.ok { color: var(--success); }
+
+    /* ── STRENGTH ── */
+    .strength-wrap { margin-top: 8px; }
+    .strength-bars { display: flex; gap: 4px; margin-bottom: 4px; }
+    .sbar { flex: 1; height: 3px; border-radius: 2px; background: var(--border); transition: background 0.3s; }
+    .strength-label { font-size: 11px; font-family: 'Space Mono', monospace; }
+
+    /* ── SELECT ── */
+    .form-select {
+      width: 100%; padding: 13px 14px 13px 42px;
+      background: var(--input-bg); border: 1px solid var(--border);
+      border-radius: 10px; color: var(--text);
+      font-family: 'DM Sans', sans-serif; font-size: 14px;
+      outline: none; transition: all 0.3s; cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b6b8a' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 14px center;
+    }
+    .form-select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(232,255,71,0.07); }
+    .form-select option { background: #16161f; }
+
+    /* ── CHECKBOX ITEMS ── */
+    .check-item {
+      display: flex; align-items: flex-start; gap: 12px;
+      padding: 14px 16px; border: 1px solid var(--border);
+      border-radius: 10px; margin-bottom: 12px; cursor: none;
+      transition: all 0.3s; position: relative; overflow: hidden;
+    }
+    .check-item:hover { border-color: rgba(232,255,71,0.2); background: rgba(232,255,71,0.02); }
+    .check-item.checked { border-color: rgba(232,255,71,0.3); background: rgba(232,255,71,0.04); }
+    .custom-check {
+      width: 20px; height: 20px; min-width: 20px;
+      border: 1.5px solid var(--border); border-radius: 6px;
+      background: var(--input-bg);
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.25s; margin-top: 1px;
+    }
+    .check-item.checked .custom-check { background: var(--accent); border-color: var(--accent); }
+    .check-item.checked .custom-check::after { content: '✓'; font-size: 12px; font-weight: 700; color: #0a0a0f; }
+    .check-text { font-size: 13px; line-height: 1.5; }
+    .check-text strong { font-size: 14px; display: block; margin-bottom: 2px; }
+    .check-text span { color: var(--muted); font-size: 12px; }
+    .check-text a { color: var(--accent); text-decoration: none; }
+
+    /* ── PLAN CARDS ── */
+    .plan-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 24px; }
+    .plan-pick {
+      padding: 16px; border: 1.5px solid var(--border);
+      border-radius: 12px; cursor: none; transition: all 0.3s;
+      text-align: center; position: relative; overflow: hidden;
+    }
+    .plan-pick:hover { border-color: rgba(232,255,71,0.25); transform: translateY(-2px); }
+    .plan-pick.selected { border-color: var(--accent); background: rgba(232,255,71,0.04); }
+    .plan-pick.selected::before {
+      content: '✓';
+      position: absolute; top: 8px; right: 10px;
+      font-size: 11px; font-weight: 700; color: var(--accent);
+    }
+    .plan-badge {
+      font-size: 9px; letter-spacing: 2px; text-transform: uppercase;
+      color: var(--muted); font-family: 'Space Mono', monospace; margin-bottom: 8px;
+    }
+    .plan-price-tag { font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 1px; }
+    .plan-price-tag .cent { font-size: 14px; vertical-align: top; margin-top: 5px; display: inline-block; }
+    .plan-period-sm { font-size: 11px; color: var(--muted); }
+    .popular-badge {
+      background: var(--accent); color: #0a0a0f;
+      font-size: 9px; font-weight: 700; letter-spacing: 1px;
+      padding: 2px 8px; border-radius: 100px; display: inline-block;
+      margin-bottom: 6px;
+    }
+
+    /* ── AVATAR PICKER ── */
+    .avatar-row {
+      display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px;
+    }
+    .avatar-opt {
+      width: 52px; height: 52px; border-radius: 50%;
+      border: 2px solid var(--border); cursor: none;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; transition: all 0.3s;
+      background: var(--input-bg);
+    }
+    .avatar-opt:hover { border-color: rgba(255,255,255,0.25); transform: scale(1.1); }
+    .avatar-opt.selected { border-color: var(--accent); box-shadow: 0 0 16px var(--glow); transform: scale(1.12); }
+
+    /* ── SUBMIT ── */
+    .btn-submit {
+      width: 100%; padding: 16px;
+      background: var(--accent); color: #0a0a0f;
+      font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 700;
+      letter-spacing: 0.5px; border: none; border-radius: 10px;
+      cursor: none; position: relative; overflow: hidden;
+      transition: all 0.3s; margin-top: 4px;
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+    }
+    .btn-submit::before {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(135deg, transparent 30%, rgba(255,255,255,0.3) 50%, transparent 70%);
+      transform: translateX(-100%); transition: transform 0.6s;
+    }
+    .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 12px 40px var(--glow); }
+    .btn-submit:hover::before { transform: translateX(100%); }
+    .btn-submit.loading { pointer-events: none; opacity: 0.8; }
+    .btn-submit .spinner {
+      width: 18px; height: 18px;
+      border: 2px solid rgba(0,0,0,0.2); border-top-color: #0a0a0f;
+      border-radius: 50%; animation: spin 0.7s linear infinite; display: none;
+    }
+    .btn-submit.loading .spinner { display: block; }
+    .btn-submit.loading .btn-txt { display: none; }
+    .btn-submit.loading .btn-arr { display: none; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .btn-arr { transition: transform 0.3s; }
+    .btn-submit:hover .btn-arr { transform: translateX(4px); }
+
+    .btn-back {
+      width: 100%; padding: 13px;
+      background: transparent; border: 1px solid var(--border);
+      color: var(--muted); font-family: 'DM Sans', sans-serif; font-size: 14px;
+      font-weight: 500; border-radius: 10px; cursor: none;
+      transition: all 0.3s; margin-top: 10px;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .btn-back:hover { border-color: rgba(255,255,255,0.2); color: var(--text); }
+    .btn-back svg { transition: transform 0.3s; }
+    .btn-back:hover svg { transform: translateX(-3px); }
+
+    /* ── SUCCESS STATE ── */
+    .success-panel {
+      display: none; text-align: center; padding: 20px 0;
+      animation: fadeUp 0.6s ease both;
+    }
+    .success-panel.show { display: block; }
+    .success-ring {
+      width: 80px; height: 80px; border-radius: 50%;
+      background: rgba(0,255,136,0.1); border: 2px solid var(--success);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 24px; font-size: 32px;
+      box-shadow: 0 0 40px rgba(0,255,136,0.15);
+      animation: pop 0.5s cubic-bezier(0.16,1,0.3,1) both;
+    }
+    @keyframes pop { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    .success-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 48px; letter-spacing: 2px; margin-bottom: 10px;
+    }
+    .success-title em { font-style: normal; color: var(--success); }
+    .success-sub { font-size: 14px; color: var(--muted); margin-bottom: 32px; line-height: 1.6; }
+    .confetti-row { display: flex; justify-content: center; gap: 6px; margin-bottom: 28px; }
+    .conf { font-size: 20px; animation: confFloat 1.5s ease-in-out infinite; }
+    .conf:nth-child(2) { animation-delay: 0.2s; }
+    .conf:nth-child(3) { animation-delay: 0.4s; }
+    .conf:nth-child(4) { animation-delay: 0.6s; }
+    .conf:nth-child(5) { animation-delay: 0.8s; }
+    @keyframes confFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+    .btn-goto {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 14px 36px;
+      background: var(--success); color: #0a0a0f;
+      font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 700;
+      border: none; border-radius: 10px; cursor: none; transition: all 0.3s;
+    }
+    .btn-goto:hover { transform: translateY(-2px); box-shadow: 0 12px 30px rgba(0,255,136,0.2); }
+
+    /* ── TOAST ── */
+    #toast {
+      position: fixed; bottom: 28px; right: 28px; z-index: 9999;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 14px 20px;
+      display: flex; align-items: center; gap: 10px;
+      font-size: 13px; transform: translateY(80px); opacity: 0;
+      transition: all 0.4s cubic-bezier(0.16,1,0.3,1); pointer-events: none;
+    }
+    #toast.show { transform: translateY(0); opacity: 1; }
+    .tdot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); animation: pulse 1.5s infinite; }
+    #toast.err .tdot { background: var(--accent2); }
+    #toast.err { border-color: rgba(255,71,87,0.3); }
+
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* ── MOBILE ── */
+    @media (max-width: 600px) {
+      .signup-card { padding: 28px 20px; }
+      .field-row { grid-template-columns: 1fr; }
+      .plan-row { grid-template-columns: 1fr; }
+      .step-connector { width: 40px; }
+      body { cursor: auto; }
+      #cursor, #cursor-ring { display: none; }
+      .back-link, .login-link { top: 16px; }
+      .back-link { left: 20px; }
+      .login-link { right: 20px; }
+    }
+
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  </style>
+</head>
+<body>
+
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+<div id="toast"><div class="tdot"></div><span id="toast-msg">Done!</span></div>
+
+<a href="homepage.html" class="back-link">
+  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+  Home
+</a>
+<a href="loginpage.html" class="login-link">Already a member? <span>Sign in →</span></a>
+
+<div class="bg-orb orb-a"></div>
+<div class="bg-orb orb-b"></div>
+<div class="bg-orb orb-c"></div>
+<div class="bg-grid"></div>
+
+<div class="page-wrap">
+
+  <!-- STEPPER -->
+  <div class="stepper" id="stepper">
+    <div class="step-item">
+      <div class="step-circle active" id="sc1">1</div>
+      <div class="step-label active" id="sl1">Account</div>
+    </div>
+    <div class="step-connector" id="conn1"><div class="fill"></div></div>
+    <div class="step-item">
+      <div class="step-circle" id="sc2">2</div>
+      <div class="step-label" id="sl2">Profile</div>
+    </div>
+    <div class="step-connector" id="conn2"><div class="fill"></div></div>
+    <div class="step-item">
+      <div class="step-circle" id="sc3">3</div>
+      <div class="step-label" id="sl3">Plan</div>
+    </div>
+    <div class="step-connector" id="conn3"><div class="fill"></div></div>
+    <div class="step-item">
+      <div class="step-circle" id="sc4">4</div>
+      <div class="step-label" id="sl4">Done</div>
+    </div>
+  </div>
+
+  <!-- SIGNUP CARD -->
+  <div class="signup-card" id="mainCard">
+
+    <!-- ═══ STEP 1: ACCOUNT ═══ -->
+    <div class="step-panel active" id="panel1">
+      <div class="card-header">
+        <div class="card-tag"><span class="dot"></span> Step 1 of 3</div>
+        <h2 class="card-title">CREATE YOUR <em>ACCOUNT</em></h2>
+        <p class="card-sub">Start free — no credit card needed.</p>
+      </div>
+
+      <div class="social-row">
+        <button class="social-btn" onclick="toast('Connecting to Google...')">
+          <svg width="15" height="15" viewBox="0 0 24 24"><path fill="#EA4335" d="M5.27 9.76A7.08 7.08 0 0 1 12 4.9c1.76 0 3.35.64 4.58 1.69l3.41-3.41A11.94 11.94 0 0 0 12 1C8.15 1 4.8 3 2.9 6.04l2.37 3.72Z"/><path fill="#34A853" d="M16.04 18.01A7.07 7.07 0 0 1 12 19.1c-2.9 0-5.38-1.75-6.56-4.28l-3.68 2.84A11.97 11.97 0 0 0 12 23c3.25 0 6.2-1.18 8.45-3.12l-4.41-1.87Z"/><path fill="#FBBC05" d="M5.44 14.82a7.2 7.2 0 0 1 0-5.56L2.9 5.54A11.93 11.93 0 0 0 1 12c0 1.93.46 3.75 1.27 5.36l3.17-2.54Z"/><path fill="#4285F4" d="M23 12c0-.78-.07-1.53-.2-2.27H12v4.54h6.18a5.27 5.27 0 0 1-2.3 3.46l4.4 1.87C22.01 17.76 23 15.07 23 12Z"/></svg>
+          Google
+        </button>
+        <button class="social-btn" onclick="toast('Connecting to GitHub...')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12c0 4.42 2.87 8.17 6.84 9.49.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.46-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.61.07-.61 1 .07 1.53 1.03 1.53 1.03.9 1.52 2.34 1.08 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02a9.56 9.56 0 0 1 2.5-.34c.85 0 1.7.11 2.5.34 1.91-1.29 2.75-1.02 2.75-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.74c0 .27.18.58.69.48A10.01 10.01 0 0 0 22 12c0-5.52-4.48-10-10-10Z"/></svg>
+          GitHub
+        </button>
+        <button class="social-btn" onclick="toast('Connecting to LinkedIn...')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="#0A66C2"><path d="M20.447 20.452H16.89v-5.57c0-1.327-.024-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.668H9.344V9h3.414v1.561h.049c.476-.9 1.637-1.852 3.368-1.852 3.6 0 4.267 2.369 4.267 5.455v6.288zM5.337 7.433a1.982 1.982 0 1 1 0-3.964 1.982 1.982 0 0 1 0 3.964zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+          LinkedIn
+        </button>
+      </div>
+
+      <div class="divider"><span>or with email</span></div>
+
+      <div class="field-row">
+        <div class="form-group" id="fg-fname">
+          <label class="form-label">First Name</label>
+          <div class="input-wrap">
+            <span class="input-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+            <input type="text" class="form-input" id="fname" placeholder="John" oninput="validateName(this,'fg-fname')" onfocus="focusG('fg-fname')" onblur="blurG('fg-fname')"/>
+            <span class="input-status" id="st-fname"></span>
+          </div>
+          <div class="field-msg err" id="err-fname">⚠ At least 2 characters</div>
+        </div>
+        <div class="form-group" id="fg-lname">
+          <label class="form-label">Last Name</label>
+          <div class="input-wrap">
+            <span class="input-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+            <input type="text" class="form-input" id="lname" placeholder="Doe" oninput="validateName(this,'fg-lname')" onfocus="focusG('fg-lname')" onblur="blurG('fg-lname')"/>
+            <span class="input-status" id="st-lname"></span>
+          </div>
+          <div class="field-msg err" id="err-lname">⚠ At least 2 characters</div>
+        </div>
+      </div>
+
+      <div class="form-group" id="fg-email">
+        <label class="form-label">Email Address</label>
+        <div class="input-wrap">
+          <span class="input-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 7 10-7"/></svg></span>
+          <input type="email" class="form-input" id="reg-email" placeholder="john@example.com" oninput="validateEmailF(this,'fg-email')" onfocus="focusG('fg-email')" onblur="blurG('fg-email')"/>
+          <span class="input-status" id="st-email"></span>
+        </div>
+        <div class="field-msg err" id="err-email">⚠ Enter a valid email address</div>
+      </div>
+
+      <div class="form-group" id="fg-pass">
+        <label class="form-label">Password <span class="label-hint">min 8 chars</span></label>
+        <div class="input-wrap">
+          <span class="input-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
+          <input type="password" class="form-input" id="reg-pass" placeholder="Create strong password" oninput="checkPass(this)" onfocus="focusG('fg-pass')" onblur="blurG('fg-pass')"/>
+          <button class="pass-toggle" onclick="togglePass('reg-pass','eye1')" type="button">
+            <svg id="eye1" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+        <div class="strength-wrap" id="sw">
+          <div class="strength-bars"><div class="sbar" id="b1"></div><div class="sbar" id="b2"></div><div class="sbar" id="b3"></div><div class="sbar" id="b4"></div></div>
+          <div class="strength-label" id="slbl" style="color:var(--muted)">Enter password</div>
+        </div>
+      </div>
+
+      <div class="form-group" id="fg-cpass">
+        <label class="form-label">Confirm Password</label>
+        <div class="input-wrap">
+          <span class="input-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m9 12 2 2 4-4"/><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
+          <input type="password" class="form-input" id="reg-cpass" placeholder="Repeat your password" oninput="checkConfirm(this)" onfocus="focusG('fg-cpass')" onblur="blurG('fg-cpass')"/>
+          <button class="pass-toggle" onclick="togglePass('reg-cpass','eye2')" type="button">
+            <svg id="eye2" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+        <div class="field-msg err" id="err-cpass">⚠ Passwords do not match</div>
+        <div class="field-msg ok" id="ok-cpass">✓ Passwords match!</div>
+      </div>
+
+      <button class="btn-submit" onclick="goStep2()">
+        <span class="btn-txt">Continue to Profile</span>
+        <svg class="btn-arr" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        <div class="spinner"></div>
+      </button>
+    </div>
+
+    <!-- ═══ STEP 2: PROFILE ═══ -->
+    <div class="step-panel" id="panel2">
+      <div class="card-header">
+        <div class="card-tag"><span class="dot"></span> Step 2 of 3</div>
+        <h2 class="card-title">BUILD YOUR <em>PROFILE</em></h2>
+        <p class="card-sub">Help us personalize your experience.</p>
+      </div>
+
+      <div class="form-group" id="fg-username">
+        <label class="form-label">Username <span class="label-hint">eup.io/@username</span></label>
+        <div class="input-wrap">
+          <span class="input-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+          <input type="text" class="form-input" id="username" placeholder="coolprompter42" oninput="checkUsername(this)" onfocus="focusG('fg-username')" onblur="blurG('fg-username')"/>
+          <span class="input-status" id="st-user"></span>
+        </div>
+        <div class="field-msg err" id="err-user">⚠ 3–20 characters, letters & numbers only</div>
+        <div class="field-msg ok" id="ok-user">✓ Username available!</div>
+      </div>
+
+      <div class="form-group" id="fg-role">
+        <label class="form-label">Your Role</label>
+        <div class="input-wrap">
+          <span class="input-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg></span>
+          <select class="form-select" id="role" onfocus="focusG('fg-role')" onblur="blurG('fg-role')">
+            <option value="" disabled selected>Select your role...</option>
+            <option>AI / ML Engineer</option>
+            <option>Product Manager</option>
+            <option>Developer / Engineer</option>
+            <option>Designer</option>
+            <option>Content Creator</option>
+            <option>Researcher</option>
+            <option>Founder / CEO</option>
+            <option>Student</option>
+            <option>Other</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group" id="fg-bio">
+        <label class="form-label">Short Bio <span class="label-hint">optional</span></label>
+        <div class="input-wrap">
+          <textarea class="form-input" id="bio" rows="3" placeholder="Tell us a little about yourself..." style="padding-top:13px;padding-left:14px;resize:none;height:auto;" onfocus="focusG('fg-bio')" onblur="blurG('fg-bio')"></textarea>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Pick an Avatar</label>
+        <div class="avatar-row" id="avatarRow">
+          <div class="avatar-opt selected" onclick="pickAvatar(this)">🤖</div>
+          <div class="avatar-opt" onclick="pickAvatar(this)">🧠</div>
+          <div class="avatar-opt" onclick="pickAvatar(this)">⚡</div>
+          <div class="avatar-opt" onclick="pickAvatar(this)">🎯</div>
+          <div class="avatar-opt" onclick="pickAvatar(this)">🚀</div>
+          <div class="avatar-opt" onclick="pickAvatar(this)">🔮</div>
+          <div class="avatar-opt" onclick="pickAvatar(this)">🌌</div>
+          <div class="avatar-opt" onclick="pickAvatar(this)">🦾</div>
+        </div>
+      </div>
+
+      <button class="btn-submit" onclick="goStep3()">
+        <span class="btn-txt">Continue to Plan</span>
+        <svg class="btn-arr" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        <div class="spinner"></div>
+      </button>
+      <button class="btn-back" onclick="goBack(1)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Back to Account
+      </button>
+    </div>
+
+    <!-- ═══ STEP 3: PLAN ═══ -->
+    <div class="step-panel" id="panel3">
+      <div class="card-header">
+        <div class="card-tag"><span class="dot"></span> Step 3 of 3</div>
+        <h2 class="card-title">CHOOSE YOUR <em>PLAN</em></h2>
+        <p class="card-sub">Start free anytime, upgrade later.</p>
+      </div>
+
+      <div class="plan-row" id="planRow">
+        <div class="plan-pick selected" onclick="pickPlan(this,'free')">
+          <div class="plan-badge">Starter</div>
+          <div class="plan-price-tag">$0</div>
+          <div class="plan-period-sm">Forever</div>
+        </div>
+        <div class="plan-pick" onclick="pickPlan(this,'pro')">
+          <div class="popular-badge">POPULAR</div>
+          <div class="plan-badge">Pro</div>
+          <div class="plan-price-tag"><span class="cent">$</span>29</div>
+          <div class="plan-period-sm">/ month</div>
+        </div>
+        <div class="plan-pick" onclick="pickPlan(this,'enterprise')">
+          <div class="plan-badge">Enterprise</div>
+          <div class="plan-price-tag" style="font-size:20px;letter-spacing:0">Custom</div>
+          <div class="plan-period-sm">Contact us</div>
+        </div>
+      </div>
+
+      <div class="check-item" id="ci-terms" onclick="toggleCI('ci-terms')">
+        <div class="custom-check"></div>
+        <div class="check-text">
+          <strong>Terms & Privacy</strong>
+          <span>I agree to the <a href="termspage.html">Terms of Service</a> and <a href="privacypage.html">Privacy Policy</a>.</span>
+        </div>
+      </div>
+
+      <div class="check-item" id="ci-updates" onclick="toggleCI('ci-updates')">
+        <div class="custom-check"></div>
+        <div class="check-text">
+          <strong>Product Updates</strong>
+          <span>Send me release notes, tips, and feature announcements.</span>
+        </div>
+      </div>
+
+      <div class="check-item" id="ci-age" onclick="toggleCI('ci-age')">
+        <div class="custom-check"></div>
+        <div class="check-text">
+          <strong>Age Confirmation</strong>
+          <span>I confirm I am 16 years of age or older.</span>
+        </div>
+      </div>
+
+      <button class="btn-submit" id="finalBtn" onclick="handleSignup()">
+        <span class="btn-txt">Create My Account 🚀</span>
+        <div class="spinner"></div>
+      </button>
+      <button class="btn-back" onclick="goBack(2)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Back to Profile
+      </button>
+    </div>
+
+    <!-- ═══ SUCCESS ═══ -->
+    <div class="success-panel" id="successPanel">
+      <div class="success-ring">🎉</div>
+      <div class="confetti-row">
+        <span class="conf">✨</span><span class="conf">🚀</span>
+        <span class="conf">⚡</span><span class="conf">🎯</span>
+        <span class="conf">🧠</span>
+      </div>
+      <h2 class="success-title">YOU'RE <em>IN!</em></h2>
+      <p class="success-sub">Your EUP account has been created.<br>Welcome to the future of prompt engineering.</p>
+      <button class="btn-goto" onclick="window.location='userdashboard.html'">
+        Go to Dashboard
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  const API_BASE = 'http://127.0.0.1:5001/api/v1';
+
+  // ── CURSOR ──
+  const cur = document.getElementById('cursor');
+  const ring = document.getElementById('cursor-ring');
+  document.addEventListener('mousemove', e => {
+    cur.style.left = e.clientX + 'px'; cur.style.top = e.clientY + 'px';
+    setTimeout(() => { ring.style.left = e.clientX + 'px'; ring.style.top = e.clientY + 'px'; }, 55);
+  });
+
+  // ── TOAST ──
+  let tt;
+  function toast(msg, type = '') {
+    const el = document.getElementById('toast');
+    document.getElementById('toast-msg').textContent = msg;
+    el.className = 'show ' + type;
+    clearTimeout(tt);
+    tt = setTimeout(() => el.classList.remove('show'), 2800);
+  }
+
+  // ── FOCUS GROUPS ──
+  function focusG(id) { document.getElementById(id)?.classList.add('focused'); }
+  function blurG(id) { document.getElementById(id)?.classList.remove('focused'); }
+
+  // ── PASS TOGGLE ──
+  function togglePass(inputId, eyeId) {
+    const inp = document.getElementById(inputId);
+    const vis = inp.type === 'text';
+    inp.type = vis ? 'password' : 'text';
+    document.getElementById(eyeId).innerHTML = vis
+      ? `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"/><circle cx="12" cy="12" r="3"/>`
+      : `<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>`;
+  }
+
+  // ── VALIDATIONS ──
+  function setStatus(inputEl, stId, errId, okId, valid, errMsg) {
+    const st = document.getElementById(stId);
+    if (inputEl.value.length === 0) {
+      inputEl.className = 'form-input'; if(st) st.textContent = ''; if(st) st.classList.remove('show');
+      if(errId) document.getElementById(errId).classList.remove('show');
+      if(okId) document.getElementById(okId).classList.remove('show');
+      return;
+    }
+    inputEl.className = 'form-input ' + (valid ? 'valid' : 'invalid');
+    if(st){ st.textContent = valid ? '✓' : '✗'; st.style.color = valid ? 'var(--success)' : 'var(--accent2)'; st.classList.add('show'); }
+    if(errId){ const e = document.getElementById(errId); if(errMsg) e.querySelector ? (e.innerHTML = '⚠ '+errMsg) : null; e.classList.toggle('show', !valid); }
+    if(okId) document.getElementById(okId)?.classList.toggle('show', valid);
+  }
+
+  function validateName(inp, grp) {
+    const ok = inp.value.trim().length >= 2;
+    const id = grp.replace('fg-','');
+    setStatus(inp, 'st-'+id, 'err-'+id, null, ok);
+  }
+
+  function validateEmailF(inp) {
+    const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(inp.value);
+    setStatus(inp, 'st-email', 'err-email', null, ok);
+  }
+
+  function checkPass(inp) {
+    const v = inp.value;
+    let score = 0;
+    if (v.length >= 8) score++;
+    if (/[A-Z]/.test(v)) score++;
+    if (/[0-9]/.test(v)) score++;
+    if (/[^A-Za-z0-9]/.test(v)) score++;
+    const cols = ['#ff4757','#ff9f43','#e8ff47','#00ff88'];
+    const labs = ['Weak','Fair','Good','Strong'];
+    ['b1','b2','b3','b4'].forEach((id, i) => {
+      document.getElementById(id).style.background = i < score ? cols[score-1] : 'var(--border)';
+    });
+    const lbl = document.getElementById('slbl');
+    lbl.textContent = v.length === 0 ? 'Enter password' : labs[score-1] || 'Weak';
+    lbl.style.color = v.length === 0 ? 'var(--muted)' : (cols[score-1] || '#ff4757');
+    if (document.getElementById('reg-cpass').value) checkConfirm(document.getElementById('reg-cpass'));
+  }
+
+  function checkConfirm(inp) {
+    const pass = document.getElementById('reg-pass').value;
+    const ok = inp.value === pass && inp.value.length > 0;
+    const mismatch = inp.value.length > 0 && !ok;
+    inp.className = 'form-input ' + (ok ? 'valid' : (inp.value.length ? 'invalid' : ''));
+    document.getElementById('err-cpass').classList.toggle('show', mismatch);
+    document.getElementById('ok-cpass').classList.toggle('show', ok);
+  }
+
+  let takenUsernames = ['admin','eup','root','test','user'];
+  function checkUsername(inp) {
+    const v = inp.value.trim().toLowerCase();
+    const formatOk = /^[a-z0-9_]{3,20}$/.test(v);
+    const available = !takenUsernames.includes(v);
+    const ok = formatOk && available;
+    setStatus(inp, 'st-user', 'err-user', 'ok-user', ok);
+    if (!formatOk && v.length > 0) { document.getElementById('err-user').classList.add('show'); document.getElementById('ok-user').classList.remove('show'); }
+    else if (formatOk && !available) {
+      document.getElementById('err-user').innerHTML = '⚠ Username already taken';
+      document.getElementById('err-user').classList.add('show');
+    }
+  }
+
+  // ── AVATAR PICKER ──
+  function pickAvatar(el) {
+    document.querySelectorAll('.avatar-opt').forEach(a => a.classList.remove('selected'));
+    el.classList.add('selected');
+  }
+
+  // ── PLAN PICKER ──
+  let selectedPlan = 'free';
+  function pickPlan(el, plan) {
+    document.querySelectorAll('.plan-pick').forEach(p => p.classList.remove('selected'));
+    el.classList.add('selected');
+    selectedPlan = plan;
+    toast(plan === 'free' ? 'Free plan selected ✓' : plan === 'pro' ? 'Pro plan selected ⚡' : 'Enterprise plan — our team will reach out 📞');
+  }
+
+  // ── CHECKBOX ITEMS ──
+  function toggleCI(id) {
+    document.getElementById(id).classList.toggle('checked');
+  }
+
+  // ── STEPPER ──
+  let currentStep = 1;
+  function updateStepper(step) {
+    for (let i = 1; i <= 4; i++) {
+      const sc = document.getElementById('sc'+i);
+      const sl = document.getElementById('sl'+i);
+      if (i < step) {
+        sc.className = 'step-circle done'; sc.innerHTML = '✓';
+        sl.className = 'step-label';
+      } else if (i === step) {
+        sc.className = 'step-circle active'; sc.innerHTML = i;
+        sl.className = 'step-label active';
+      } else {
+        sc.className = 'step-circle'; sc.innerHTML = i;
+        sl.className = 'step-label';
+      }
+    }
+    for (let i = 1; i <= 3; i++) {
+      document.getElementById('conn'+i).classList.toggle('done', i < step);
+    }
+  }
+
+  function showPanel(n, direction = 'forward') {
+    document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active','back'));
+    const panel = document.getElementById('panel'+n);
+    if (panel) { panel.className = 'step-panel active' + (direction === 'back' ? ' back' : ''); }
+    currentStep = n;
+    updateStepper(n);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // ── STEP 1 → 2 ──
+  function goStep2() {
+    const fname = document.getElementById('fname').value.trim();
+    const lname = document.getElementById('lname').value.trim();
+    const email = document.getElementById('reg-email').value.trim();
+    const pass = document.getElementById('reg-pass').value;
+    const cpass = document.getElementById('reg-cpass').value;
+
+    if (fname.length < 2) { toast('Enter your first name', 'err'); return; }
+    if (lname.length < 2) { toast('Enter your last name', 'err'); return; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { toast('Enter a valid email', 'err'); return; }
+    if (pass.length < 8) { toast('Password must be 8+ characters', 'err'); return; }
+    if (pass !== cpass) { toast('Passwords do not match', 'err'); return; }
+
+    toast('Account details saved ✓');
+    showPanel(2);
+  }
+
+  // ── STEP 2 → 3 ──
+  function goStep3() {
+    const username = document.getElementById('username').value.trim();
+    const role = document.getElementById('role').value;
+    if (!username || username.length < 3) { toast('Enter a valid username', 'err'); return; }
+    if (!role) { toast('Please select your role', 'err'); return; }
+    toast('Profile saved ✓');
+    showPanel(3);
+  }
+
+  // ── BACK ──
+  function goBack(n) { showPanel(n, 'back'); }
+
+  // ── FINAL SUBMIT ──
+  async function handleSignup() {
+    const terms = document.getElementById('ci-terms').classList.contains('checked');
+    const age = document.getElementById('ci-age').classList.contains('checked');
+    if (!terms) { toast('Please accept Terms & Privacy', 'err'); return; }
+    if (!age) { toast('Please confirm your age', 'err'); return; }
+
+    const fname = document.getElementById('fname').value.trim();
+    const lname = document.getElementById('lname').value.trim();
+    const email = document.getElementById('reg-email').value.trim();
+    const password = document.getElementById('reg-pass').value;
+
+    if (!fname || !lname || !email || !password) {
+      toast('Please complete all required account fields', 'err');
+      return;
+    }
+
+    const btn = document.getElementById('finalBtn');
+    btn.classList.add('loading');
+    toast('Creating your account...');
+
+    try {
+      const signupRes = await fetch(`${API_BASE}/auth/signup`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: `${fname} ${lname}`,
+          email,
+          password,
+          plan: selectedPlan
+        })
+      });
+      const signupData = await signupRes.json();
+      if (!signupRes.ok) {
+        throw new Error(signupData.message || 'Unable to create account');
+      }
+
+      // Auto-login after successful signup for a smooth first-run flow.
+      const loginRes = await fetch(`${API_BASE}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      const loginData = await loginRes.json();
+      if (loginRes.ok && loginData.token) {
+        localStorage.setItem('eup_token', loginData.token);
+      }
+
+      btn.classList.remove('loading');
+      updateStepper(4);
+      document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active','back'));
+      document.getElementById('successPanel').classList.add('show');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch (err) {
+      btn.classList.remove('loading');
+      toast(err.message || 'Signup failed. Please try again.', 'err');
+    }
+  }
+
+  // ── ENTER KEY ──
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+      if (currentStep === 1) goStep2();
+      else if (currentStep === 2) goStep3();
+      else if (currentStep === 3) handleSignup();
+    }
+  });
+</script>
+</body>
+</html>

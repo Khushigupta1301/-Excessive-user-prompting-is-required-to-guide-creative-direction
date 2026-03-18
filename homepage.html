@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>EUP — Excessive User Prompting</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,300&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #0a0a0f;
+      --surface: #111118;
+      --card: #16161f;
+      --accent: #e8ff47;
+      --accent2: #ff4757;
+      --accent3: #00d2ff;
+      --text: #f0f0f8;
+      --muted: #6b6b8a;
+      --border: rgba(255,255,255,0.07);
+      --glow: rgba(232,255,71,0.15);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      overflow-x: hidden;
+      cursor: none;
+    }
+
+    /* ── CUSTOM CURSOR ── */
+    #cursor {
+      width: 12px; height: 12px;
+      background: var(--accent);
+      border-radius: 50%;
+      position: fixed; top: 0; left: 0;
+      pointer-events: none; z-index: 9999;
+      transform: translate(-50%,-50%);
+      transition: transform 0.08s ease;
+    }
+    #cursor-ring {
+      width: 36px; height: 36px;
+      border: 1.5px solid var(--accent);
+      border-radius: 50%;
+      position: fixed; top: 0; left: 0;
+      pointer-events: none; z-index: 9998;
+      transform: translate(-50%,-50%);
+      transition: all 0.18s ease;
+      opacity: 0.6;
+    }
+    body:has(a:hover) #cursor-ring,
+    body:has(button:hover) #cursor-ring {
+      width: 56px; height: 56px;
+      border-color: var(--accent2);
+      opacity: 1;
+    }
+
+    /* ── NOISE OVERLAY ── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none; z-index: 1; opacity: 0.5;
+    }
+
+    /* ── NAVBAR ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 20px 48px;
+      background: rgba(10,10,15,0.7);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      animation: slideDown 0.6s ease forwards;
+    }
+    @keyframes slideDown { from { transform: translateY(-100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+    .nav-logo {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 28px;
+      letter-spacing: 3px;
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .nav-logo span { color: var(--text); }
+
+    .nav-links {
+      display: flex; gap: 36px; list-style: none;
+    }
+    .nav-links a {
+      font-size: 13px; font-weight: 500; letter-spacing: 1px;
+      text-transform: uppercase; color: var(--muted);
+      text-decoration: none;
+      position: relative; padding-bottom: 4px;
+      transition: color 0.3s;
+    }
+    .nav-links a::after {
+      content: ''; position: absolute; bottom: 0; left: 0;
+      width: 0; height: 1.5px; background: var(--accent);
+      transition: width 0.3s ease;
+    }
+    .nav-links a:hover { color: var(--text); }
+    .nav-links a:hover::after { width: 100%; }
+
+    .nav-cta {
+      display: flex; gap: 12px; align-items: center;
+    }
+    .btn-ghost {
+      padding: 10px 22px; border: 1px solid var(--border);
+      background: transparent; color: var(--text); font-family: 'DM Sans', sans-serif;
+      font-size: 13px; font-weight: 500; letter-spacing: 0.5px;
+      border-radius: 6px; cursor: none;
+      transition: all 0.3s;
+    }
+    .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+
+    .btn-primary {
+      padding: 10px 24px;
+      background: var(--accent); color: #0a0a0f;
+      font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 700;
+      letter-spacing: 0.5px; border: none; border-radius: 6px;
+      cursor: none; transition: all 0.3s;
+      position: relative; overflow: hidden;
+    }
+    .btn-primary::before {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.3) 50%, transparent 60%);
+      transform: translateX(-100%); transition: transform 0.5s;
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px var(--glow); }
+    .btn-primary:hover::before { transform: translateX(100%); }
+
+    /* ── HERO ── */
+    #hero {
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      justify-content: center; align-items: flex-start;
+      padding: 140px 48px 80px;
+      position: relative; overflow: hidden;
+    }
+
+    .hero-grid-bg {
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+      background-size: 60px 60px;
+      animation: gridFade 8s ease-in-out infinite alternate;
+    }
+    @keyframes gridFade { from { opacity: 0.5; } to { opacity: 1; } }
+
+    .hero-orb {
+      position: absolute; border-radius: 50%;
+      filter: blur(120px); pointer-events: none;
+    }
+    .orb1 { width: 700px; height: 700px; background: rgba(232,255,71,0.06); top: -200px; right: -100px; animation: orbFloat 12s ease-in-out infinite; }
+    .orb2 { width: 500px; height: 500px; background: rgba(0,210,255,0.05); bottom: -100px; left: -100px; animation: orbFloat 15s ease-in-out infinite reverse; }
+    .orb3 { width: 300px; height: 300px; background: rgba(255,71,87,0.06); top: 40%; left: 40%; animation: orbFloat 10s ease-in-out infinite; }
+    @keyframes orbFloat {
+      0%, 100% { transform: translate(0,0) scale(1); }
+      50% { transform: translate(30px, -30px) scale(1.1); }
+    }
+
+    .hero-tag {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 6px 14px; border: 1px solid rgba(232,255,71,0.3);
+      border-radius: 100px; font-size: 11px; letter-spacing: 2px;
+      text-transform: uppercase; color: var(--accent); margin-bottom: 32px;
+      background: rgba(232,255,71,0.05);
+      animation: fadeUp 0.6s 0.3s ease both;
+    }
+    .hero-tag .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.8)} }
+
+    .hero-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(72px, 10vw, 160px);
+      line-height: 0.92;
+      letter-spacing: -1px;
+      margin-bottom: 28px;
+      position: relative; z-index: 2;
+    }
+    .hero-title .line { display: block; overflow: hidden; }
+    .hero-title .line span {
+      display: block;
+      animation: lineReveal 0.8s cubic-bezier(0.16,1,0.3,1) both;
+    }
+    .hero-title .line:nth-child(1) span { animation-delay: 0.4s; }
+    .hero-title .line:nth-child(2) span { animation-delay: 0.55s; }
+    .hero-title .line:nth-child(3) span { animation-delay: 0.7s; }
+    @keyframes lineReveal { from { transform: translateY(110%); } to { transform: translateY(0); } }
+
+    .hero-title .accent { color: var(--accent); }
+    .hero-title .stroke {
+      -webkit-text-stroke: 2px var(--text);
+      color: transparent;
+    }
+
+    .hero-desc {
+      max-width: 520px; font-size: 17px; line-height: 1.7;
+      color: var(--muted); margin-bottom: 48px;
+      animation: fadeUp 0.6s 0.9s ease both;
+    }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+    .hero-actions {
+      display: flex; gap: 16px; flex-wrap: wrap;
+      animation: fadeUp 0.6s 1.1s ease both;
+    }
+
+    .btn-xl {
+      padding: 16px 36px; font-size: 15px; font-weight: 700;
+      border-radius: 8px; letter-spacing: 0.5px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .btn-xl svg { transition: transform 0.3s; }
+    .btn-xl:hover svg { transform: translateX(4px); }
+
+    .btn-outline-xl {
+      padding: 16px 36px; font-size: 15px; font-weight: 500;
+      border: 1.5px solid var(--border); color: var(--text);
+      background: transparent; border-radius: 8px; cursor: none;
+      transition: all 0.3s; display: flex; align-items: center; gap: 10px;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .btn-outline-xl:hover { border-color: rgba(255,255,255,0.3); background: rgba(255,255,255,0.04); }
+
+    .hero-stats {
+      position: absolute; bottom: 48px; left: 48px; right: 48px;
+      display: flex; gap: 48px; flex-wrap: wrap;
+      animation: fadeUp 0.6s 1.3s ease both;
+    }
+    .stat { display: flex; flex-direction: column; gap: 4px; }
+    .stat-num { font-family: 'Bebas Neue', sans-serif; font-size: 36px; letter-spacing: 2px; color: var(--text); }
+    .stat-num .acc { color: var(--accent); }
+    .stat-label { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); }
+    .stat-divider { width: 1px; background: var(--border); align-self: stretch; }
+
+    /* ── MARQUEE ── */
+    .marquee-wrap {
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      overflow: hidden; padding: 14px 0;
+      background: rgba(232,255,71,0.03);
+    }
+    .marquee-track {
+      display: flex; gap: 0;
+      animation: marquee 25s linear infinite;
+      white-space: nowrap;
+    }
+    .marquee-item {
+      display: inline-flex; align-items: center; gap: 20px;
+      padding: 0 32px; font-family: 'Bebas Neue', sans-serif;
+      font-size: 14px; letter-spacing: 3px; color: var(--muted);
+    }
+    .marquee-item .dot-sep { color: var(--accent); font-size: 18px; }
+    @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+    /* ── FEATURES SECTION ── */
+    #features {
+      padding: 120px 48px;
+      position: relative;
+    }
+    .section-label {
+      font-family: 'Space Mono', monospace; font-size: 11px;
+      letter-spacing: 3px; text-transform: uppercase;
+      color: var(--accent); margin-bottom: 16px;
+    }
+    .section-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(40px, 5vw, 72px);
+      line-height: 1; letter-spacing: 1px; margin-bottom: 64px;
+    }
+    .section-title em { font-style: normal; color: var(--accent); }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+    }
+    .feature-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 36px;
+      position: relative; overflow: hidden;
+      transition: all 0.4s cubic-bezier(0.16,1,0.3,1);
+      cursor: none;
+    }
+    .feature-card::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(circle at var(--mx,50%) var(--my,50%), rgba(232,255,71,0.06), transparent 60%);
+      opacity: 0; transition: opacity 0.4s;
+    }
+    .feature-card:hover { transform: translateY(-6px); border-color: rgba(232,255,71,0.2); }
+    .feature-card:hover::before { opacity: 1; }
+
+    .feature-icon {
+      width: 52px; height: 52px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px; margin-bottom: 24px;
+      background: rgba(232,255,71,0.08);
+      border: 1px solid rgba(232,255,71,0.15);
+    }
+    .feature-card:nth-child(2) .feature-icon { background: rgba(0,210,255,0.08); border-color: rgba(0,210,255,0.15); }
+    .feature-card:nth-child(3) .feature-icon { background: rgba(255,71,87,0.08); border-color: rgba(255,71,87,0.15); }
+    .feature-card:nth-child(4) .feature-icon { background: rgba(160,71,255,0.08); border-color: rgba(160,71,255,0.15); }
+    .feature-card:nth-child(5) .feature-icon { background: rgba(255,165,0,0.08); border-color: rgba(255,165,0,0.15); }
+    .feature-card:nth-child(6) .feature-icon { background: rgba(0,255,128,0.08); border-color: rgba(0,255,128,0.15); }
+
+    .feature-num {
+      position: absolute; top: 24px; right: 28px;
+      font-family: 'Bebas Neue', sans-serif; font-size: 64px;
+      color: rgba(255,255,255,0.03); letter-spacing: 2px;
+      line-height: 1;
+    }
+    .feature-title { font-size: 18px; font-weight: 700; margin-bottom: 10px; }
+    .feature-desc { font-size: 14px; line-height: 1.6; color: var(--muted); }
+
+    /* ── HOW IT WORKS ── */
+    #how {
+      padding: 120px 48px;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+    .steps {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 0; position: relative; margin-top: 64px;
+    }
+    .steps::before {
+      content: ''; position: absolute; top: 32px; left: 10%; right: 10%;
+      height: 1px; background: linear-gradient(90deg, transparent, var(--border) 20%, var(--border) 80%, transparent);
+    }
+    .step { padding: 0 24px; text-align: center; position: relative; }
+    .step-circle {
+      width: 64px; height: 64px; border-radius: 50%;
+      border: 1.5px solid var(--border);
+      background: var(--bg);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 24px; font-family: 'Bebas Neue', sans-serif;
+      font-size: 22px; letter-spacing: 2px;
+      transition: all 0.4s;
+      position: relative; z-index: 1;
+    }
+    .step:hover .step-circle {
+      border-color: var(--accent); color: var(--accent);
+      box-shadow: 0 0 30px var(--glow);
+    }
+    .step-title { font-size: 16px; font-weight: 700; margin-bottom: 10px; }
+    .step-desc { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+    /* ── PRICING ── */
+    #pricing { padding: 120px 48px; }
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px; margin-top: 64px; max-width: 1000px;
+    }
+    .pricing-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px; padding: 40px;
+      position: relative; overflow: hidden;
+      transition: all 0.4s cubic-bezier(0.16,1,0.3,1);
+      cursor: none;
+    }
+    .pricing-card.featured {
+      border-color: var(--accent);
+      background: linear-gradient(135deg, rgba(232,255,71,0.05), var(--card));
+    }
+    .pricing-card.featured::after {
+      content: 'POPULAR';
+      position: absolute; top: 20px; right: -28px;
+      background: var(--accent); color: #0a0a0f;
+      font-size: 10px; font-weight: 700; letter-spacing: 2px;
+      padding: 4px 40px; transform: rotate(45deg);
+    }
+    .pricing-card:hover { transform: translateY(-8px); }
+    .plan-name { font-size: 12px; letter-spacing: 3px; text-transform: uppercase; color: var(--muted); margin-bottom: 20px; font-family: 'Space Mono', monospace; }
+    .plan-price { font-family: 'Bebas Neue', sans-serif; font-size: 64px; letter-spacing: 2px; line-height: 1; margin-bottom: 6px; }
+    .plan-price sup { font-size: 24px; vertical-align: top; margin-top: 10px; display: inline-block; }
+    .plan-period { font-size: 13px; color: var(--muted); margin-bottom: 32px; }
+    .plan-features { list-style: none; display: flex; flex-direction: column; gap: 14px; margin-bottom: 36px; }
+    .plan-features li { display: flex; align-items: center; gap: 12px; font-size: 14px; color: var(--muted); }
+    .plan-features li .check { color: var(--accent); font-size: 16px; flex-shrink: 0; }
+    .plan-features li.muted .check { color: var(--muted); opacity: 0.3; }
+
+    .btn-plan {
+      width: 100%; padding: 14px;
+      border-radius: 10px; font-family: 'DM Sans', sans-serif;
+      font-size: 14px; font-weight: 700; letter-spacing: 0.5px;
+      cursor: none; transition: all 0.3s;
+    }
+    .btn-plan-outline {
+      background: transparent; border: 1.5px solid var(--border); color: var(--text);
+    }
+    .btn-plan-outline:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-plan-filled {
+      background: var(--accent); border: none; color: #0a0a0f;
+    }
+    .btn-plan-filled:hover { transform: translateY(-2px); box-shadow: 0 10px 40px var(--glow); }
+
+    /* ── TESTIMONIALS ── */
+    #testimonials { padding: 120px 48px; background: var(--surface); border-top: 1px solid var(--border); }
+    .testimonials-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px; margin-top: 64px;
+    }
+    .testimonial-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 16px; padding: 32px;
+      transition: all 0.4s; cursor: none;
+    }
+    .testimonial-card:hover { transform: translateY(-4px); border-color: rgba(255,255,255,0.15); }
+    .testimonial-stars { color: var(--accent); font-size: 14px; letter-spacing: 2px; margin-bottom: 20px; }
+    .testimonial-text { font-size: 15px; line-height: 1.7; color: var(--muted); margin-bottom: 24px; font-style: italic; }
+    .testimonial-author { display: flex; align-items: center; gap: 12px; }
+    .author-avatar {
+      width: 40px; height: 40px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; font-weight: 700; background: var(--surface);
+      border: 1px solid var(--border);
+    }
+    .author-name { font-size: 14px; font-weight: 600; }
+    .author-role { font-size: 12px; color: var(--muted); }
+
+    /* ── CTA SECTION ── */
+    #cta {
+      padding: 160px 48px;
+      text-align: center; position: relative; overflow: hidden;
+    }
+    .cta-inner {
+      position: relative; z-index: 2;
+      max-width: 700px; margin: 0 auto;
+    }
+    .cta-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(52px, 7vw, 100px);
+      line-height: 0.95; letter-spacing: 2px; margin-bottom: 24px;
+    }
+    .cta-title em { font-style: normal; color: var(--accent); }
+    .cta-desc { font-size: 17px; color: var(--muted); margin-bottom: 48px; line-height: 1.6; }
+    .cta-actions { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+
+    .cta-bg-text {
+      position: absolute; bottom: -40px; left: 50%;
+      transform: translateX(-50%);
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(120px, 18vw, 220px);
+      letter-spacing: -5px;
+      color: rgba(255,255,255,0.015);
+      pointer-events: none; white-space: nowrap;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 48px; background: var(--surface);
+    }
+    .footer-inner {
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 24px;
+    }
+    .footer-logo { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 3px; color: var(--accent); }
+    .footer-links { display: flex; gap: 28px; flex-wrap: wrap; }
+    .footer-links a { font-size: 13px; color: var(--muted); text-decoration: none; transition: color 0.3s; }
+    .footer-links a:hover { color: var(--text); }
+    .footer-copy { font-size: 12px; color: var(--muted); font-family: 'Space Mono', monospace; }
+
+    /* ── SCROLL REVEAL ── */
+    .reveal {
+      opacity: 0; transform: translateY(30px);
+      transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.16,1,0.3,1);
+    }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    /* ── NOTIFICATION TOAST ── */
+    #toast {
+      position: fixed; bottom: 32px; right: 32px; z-index: 999;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 16px 22px;
+      display: flex; align-items: center; gap: 12px;
+      font-size: 14px; transform: translateY(100px);
+      opacity: 0; transition: all 0.4s cubic-bezier(0.16,1,0.3,1);
+      pointer-events: none;
+    }
+    #toast.show { transform: translateY(0); opacity: 1; }
+    #toast .toast-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); animation: pulse 1.5s infinite; }
+
+    /* ── LOADING SCREEN ── */
+    #loader {
+      position: fixed; inset: 0; z-index: 9999;
+      background: var(--bg);
+      display: flex; align-items: center; justify-content: center;
+      flex-direction: column; gap: 20px;
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    #loader.hide { opacity: 0; pointer-events: none; }
+    .loader-text {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 48px; letter-spacing: 8px; color: var(--text);
+    }
+    .loader-text span { color: var(--accent); }
+    .loader-bar {
+      width: 200px; height: 2px;
+      background: var(--border); border-radius: 2px; overflow: hidden;
+    }
+    .loader-fill {
+      height: 100%; background: var(--accent); width: 0;
+      border-radius: 2px;
+      animation: load 1.4s ease forwards;
+    }
+    @keyframes load { to { width: 100%; } }
+
+    /* ── MOBILE ── */
+    @media (max-width: 768px) {
+      nav { padding: 16px 24px; }
+      .nav-links { display: none; }
+      #hero { padding: 120px 24px 80px; }
+      .hero-stats { position: static; margin-top: 48px; }
+      #features, #how, #pricing, #testimonials, #cta { padding: 80px 24px; }
+      .steps::before { display: none; }
+      footer { padding: 32px 24px; }
+      .footer-inner { flex-direction: column; align-items: flex-start; }
+      body { cursor: auto; }
+      #cursor, #cursor-ring { display: none; }
+    }
+
+    /* ── MOBILE NAV HAMBURGER ── */
+    .nav-hamburger {
+      display: none; flex-direction: column; gap: 5px;
+      background: none; border: none; cursor: pointer; padding: 4px;
+    }
+    .nav-hamburger span { width: 22px; height: 1.5px; background: var(--text); border-radius: 2px; transition: all 0.3s; }
+
+    .mobile-menu {
+      position: fixed;
+      top: 72px;
+      left: 16px;
+      right: 16px;
+      z-index: 99;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: rgba(17,17,24,0.98);
+      backdrop-filter: blur(16px);
+      padding: 14px;
+      display: none;
+      flex-direction: column;
+      gap: 8px;
+      box-shadow: 0 18px 42px rgba(0,0,0,0.35);
+    }
+    .mobile-menu.show { display: flex; }
+    .mobile-menu a {
+      text-decoration: none;
+      color: var(--text);
+      font-size: 14px;
+      letter-spacing: 0.4px;
+      padding: 10px 8px;
+      border-radius: 8px;
+      transition: background 0.2s ease;
+    }
+    .mobile-menu a:hover { background: rgba(255,255,255,0.04); }
+    .mobile-menu .mobile-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 4px 0 2px;
+    }
+    .mobile-menu .mobile-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      padding-top: 4px;
+    }
+
+    body.mobile-menu-open { overflow: hidden; }
+
+    .nav-hamburger.active span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
+    .nav-hamburger.active span:nth-child(2) { opacity: 0; }
+    .nav-hamburger.active span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
+
+    @media (max-width: 768px) { .nav-hamburger { display: flex; } .nav-cta { display: none; } }
+  </style>
+</head>
+<body>
+
+<!-- LOADER -->
+<div id="loader">
+  <div class="loader-text">E<span>U</span>P</div>
+  <div class="loader-bar"><div class="loader-fill"></div></div>
+</div>
+
+<!-- CURSOR -->
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+
+<!-- TOAST -->
+<div id="toast"><div class="toast-dot"></div><span id="toast-msg">Action completed!</span></div>
+
+<!-- NAVBAR -->
+<nav>
+  <a href="homepage.html" class="nav-logo">E<span>U</span>P</a>
+  <ul class="nav-links">
+    <li><a href="#features">Features</a></li>
+    <li><a href="#how">How It Works</a></li>
+    <li><a href="#pricing">Pricing</a></li>
+    <li><a href="#testimonials">Reviews</a></li>
+    <li><a href="#cta">Contact</a></li>
+  </ul>
+  <div class="nav-cta">
+    <button class="btn-ghost" onclick="window.location='loginpage.html'">Log In</button>
+    <button class="btn-primary" onclick="window.location='signuppage.html'">Get Started →</button>
+  </div>
+  <button id="navHamburger" class="nav-hamburger" type="button" aria-label="Toggle menu" aria-expanded="false" aria-controls="mobileMenu" onclick="toggleMobileMenu()">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<div id="mobileMenu" class="mobile-menu" hidden>
+  <a href="#features" onclick="closeMobileMenu()">Features</a>
+  <a href="#how" onclick="closeMobileMenu()">How It Works</a>
+  <a href="#pricing" onclick="closeMobileMenu()">Pricing</a>
+  <a href="#testimonials" onclick="closeMobileMenu()">Reviews</a>
+  <a href="#cta" onclick="closeMobileMenu()">Contact</a>
+  <div class="mobile-divider"></div>
+  <div class="mobile-actions">
+    <button class="btn-ghost" onclick="closeMobileMenu(); window.location='loginpage.html'">Log In</button>
+    <button class="btn-primary" onclick="closeMobileMenu(); window.location='signuppage.html'">Get Started →</button>
+  </div>
+</div>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-grid-bg"></div>
+  <div class="hero-orb orb1"></div>
+  <div class="hero-orb orb2"></div>
+  <div class="hero-orb orb3"></div>
+
+  <div class="hero-tag">
+    <span class="dot"></span> AI-Powered Prompt Engineering
+  </div>
+
+  <h1 class="hero-title">
+    <span class="line"><span>STOP</span></span>
+    <span class="line"><span class="stroke">GUESSING,</span></span>
+    <span class="line"><span>START <em class="accent">PROMPTING</em></span></span>
+  </h1>
+
+  <p class="hero-desc">
+    EUP eliminates trial-and-error. Build intelligent, structured prompts that get the exact output you need — every single time. No more rewrites.
+  </p>
+
+  <div class="hero-actions">
+    <button class="btn-primary btn-xl" onclick="window.location='signuppage.html'">
+      Start Free Trial
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </button>
+    <button class="btn-outline-xl" onclick="window.location='bookademo.html'">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8" fill="currentColor" stroke="none"/></svg>
+      Watch Demo
+    </button>
+  </div>
+
+  <div class="hero-stats">
+    <div class="stat">
+      <div class="stat-num">50<span class="acc">K+</span></div>
+      <div class="stat-label">Active Users</div>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat">
+      <div class="stat-num">3.2<span class="acc">M</span></div>
+      <div class="stat-label">Prompts Generated</div>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat">
+      <div class="stat-num">98<span class="acc">%</span></div>
+      <div class="stat-label">Accuracy Rate</div>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat">
+      <div class="stat-num">4.9<span class="acc">★</span></div>
+      <div class="stat-label">Average Rating</div>
+    </div>
+  </div>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee-wrap">
+  <div class="marquee-track">
+    <span class="marquee-item">Prompt Engineering <span class="dot-sep">✦</span></span>
+    <span class="marquee-item">AI Optimization <span class="dot-sep">✦</span></span>
+    <span class="marquee-item">Context Awareness <span class="dot-sep">✦</span></span>
+    <span class="marquee-item">Zero Hallucinations <span class="dot-sep">✦</span></span>
+    <span class="marquee-item">Structured Output <span class="dot-sep">✦</span></span>
+    <span class="marquee-item">Real-time Preview <span class="dot-sep">✦</span></span>
+    <span class="marquee-item">Team Collaboration <span class="dot-sep">✦</span></span>
+    <span class="marquee-item">Version Control <span class="dot-sep">✦</span></span>
+    <span class="marquee-item">Prompt Engineering <span class="dot-sep">✦</span></span>
+    <span class="marquee-item">AI Optimization <span class="dot-sep">✦</span></span>
+    <span class="marquee-item">Context Awareness <span class="dot-sep">✦</span></span>
+    <span class="marquee-item">Zero Hallucinations <span class="dot-sep">✦</span></span>
+    <span class="marquee-item">Structured Output <span class="dot-sep">✦</span></span>
+    <span class="marquee-item">Real-time Preview <span class="dot-sep">✦</span></span>
+    <span class="marquee-item">Team Collaboration <span class="dot-sep">✦</span></span>
+    <span class="marquee-item">Version Control <span class="dot-sep">✦</span></span>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<section id="features">
+  <div class="section-label">// What We Offer</div>
+  <h2 class="section-title reveal">Engineered for<br><em>Precision</em></h2>
+  <div class="features-grid">
+    <div class="feature-card reveal" style="transition-delay:0.05s">
+      <div class="feature-num">01</div>
+      <div class="feature-icon">⚡</div>
+      <div class="feature-title">Smart Prompt Builder</div>
+      <div class="feature-desc">Drag-and-drop blocks to construct complex prompts with variables, conditionals, and dynamic content injection.</div>
+    </div>
+    <div class="feature-card reveal" style="transition-delay:0.1s">
+      <div class="feature-num">02</div>
+      <div class="feature-icon">🎯</div>
+      <div class="feature-title">Intent Detection</div>
+      <div class="feature-desc">Our AI analyzes your goal and automatically suggests the best prompt structure to achieve your desired output.</div>
+    </div>
+    <div class="feature-card reveal" style="transition-delay:0.15s">
+      <div class="feature-num">03</div>
+      <div class="feature-icon">🔄</div>
+      <div class="feature-title">Live Preview</div>
+      <div class="feature-desc">See your prompt output in real-time as you build. Test against multiple models simultaneously before deploying.</div>
+    </div>
+    <div class="feature-card reveal" style="transition-delay:0.2s">
+      <div class="feature-num">04</div>
+      <div class="feature-icon">📚</div>
+      <div class="feature-title">Prompt Library</div>
+      <div class="feature-desc">Access thousands of community-vetted templates. Fork, remix, and publish your own masterpieces.</div>
+    </div>
+    <div class="feature-card reveal" style="transition-delay:0.25s">
+      <div class="feature-num">05</div>
+      <div class="feature-icon">🔐</div>
+      <div class="feature-title">Team Workspaces</div>
+      <div class="feature-desc">Collaborate in real-time. Version control, role-based access, and audit logs for enterprise teams.</div>
+    </div>
+    <div class="feature-card reveal" style="transition-delay:0.3s">
+      <div class="feature-num">06</div>
+      <div class="feature-icon">📊</div>
+      <div class="feature-title">Analytics Dashboard</div>
+      <div class="feature-desc">Track prompt performance, token usage, success rates, and ROI across your entire organization.</div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how">
+  <div class="section-label">// Process</div>
+  <h2 class="section-title reveal">How It <em>Works</em></h2>
+  <div class="steps">
+    <div class="step reveal" style="transition-delay:0.1s">
+      <div class="step-circle">01</div>
+      <div class="step-title">Define Your Goal</div>
+      <div class="step-desc">Tell EUP what you want to achieve. Be as vague or specific as you like — we'll figure it out.</div>
+    </div>
+    <div class="step reveal" style="transition-delay:0.2s">
+      <div class="step-circle">02</div>
+      <div class="step-title">Build Your Prompt</div>
+      <div class="step-desc">Use our visual builder or AI assistant to craft the perfect structured prompt.</div>
+    </div>
+    <div class="step reveal" style="transition-delay:0.3s">
+      <div class="step-circle">03</div>
+      <div class="step-title">Test & Refine</div>
+      <div class="step-desc">Run instant previews, compare outputs, and iterate until you're 100% satisfied.</div>
+    </div>
+    <div class="step reveal" style="transition-delay:0.4s">
+      <div class="step-circle">04</div>
+      <div class="step-title">Deploy & Scale</div>
+      <div class="step-desc">Export via API, share with your team, or add to the public library for the world to use.</div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section id="pricing">
+  <div class="section-label">// Pricing</div>
+  <h2 class="section-title reveal">Simple, Transparent <em>Pricing</em></h2>
+  <div class="pricing-grid">
+    <div class="pricing-card reveal" style="transition-delay:0.05s">
+      <div class="plan-name">Starter</div>
+      <div class="plan-price"><sup>$</sup>0</div>
+      <div class="plan-period">Forever free</div>
+      <ul class="plan-features">
+        <li><span class="check">✓</span> 50 prompts / month</li>
+        <li><span class="check">✓</span> Basic builder</li>
+        <li><span class="check">✓</span> 5 templates</li>
+        <li class="muted"><span class="check">×</span> Team workspaces</li>
+        <li class="muted"><span class="check">×</span> Analytics</li>
+      </ul>
+      <button class="btn-plan btn-plan-outline" onclick="window.location='signuppage.html'">Get Started Free</button>
+    </div>
+    <div class="pricing-card featured reveal" style="transition-delay:0.1s">
+      <div class="plan-name">Pro</div>
+      <div class="plan-price"><sup>$</sup>29</div>
+      <div class="plan-period">per month, billed annually</div>
+      <ul class="plan-features">
+        <li><span class="check">✓</span> Unlimited prompts</li>
+        <li><span class="check">✓</span> Advanced builder</li>
+        <li><span class="check">✓</span> Full template library</li>
+        <li><span class="check">✓</span> 5 team seats</li>
+        <li><span class="check">✓</span> Full analytics</li>
+      </ul>
+      <button class="btn-plan btn-plan-filled" onclick="window.location='signuppage.html'">Start Pro Trial</button>
+    </div>
+    <div class="pricing-card reveal" style="transition-delay:0.15s">
+      <div class="plan-name">Enterprise</div>
+      <div class="plan-price" style="font-size:48px; letter-spacing:1px;">Custom</div>
+      <div class="plan-period">tailored to your scale</div>
+      <ul class="plan-features">
+        <li><span class="check">✓</span> Everything in Pro</li>
+        <li><span class="check">✓</span> Unlimited seats</li>
+        <li><span class="check">✓</span> SSO & compliance</li>
+        <li><span class="check">✓</span> Dedicated support</li>
+        <li><span class="check">✓</span> Custom integrations</li>
+      </ul>
+      <button class="btn-plan btn-plan-outline" onclick="window.location='bookademo.html'">Contact Sales</button>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section id="testimonials">
+  <div class="section-label">// Reviews</div>
+  <h2 class="section-title reveal">What Our <em>Users Say</em></h2>
+  <div class="testimonials-grid">
+    <div class="testimonial-card reveal" style="transition-delay:0.05s">
+      <div class="testimonial-stars">★★★★★</div>
+      <div class="testimonial-text">"EUP completely changed how our team interacts with AI. We went from hours of prompt tweaking to getting perfect outputs on the first try."</div>
+      <div class="testimonial-author">
+        <div class="author-avatar">AK</div>
+        <div>
+          <div class="author-name">Aisha Khan</div>
+          <div class="author-role">Head of AI, TechFlow</div>
+        </div>
+      </div>
+    </div>
+    <div class="testimonial-card reveal" style="transition-delay:0.1s">
+      <div class="testimonial-stars">★★★★★</div>
+      <div class="testimonial-text">"The prompt library alone is worth it. I found templates I never would've thought of, saved me weeks of experimentation."</div>
+      <div class="testimonial-author">
+        <div class="author-avatar">MS</div>
+        <div>
+          <div class="author-name">Marcus Silva</div>
+          <div class="author-role">Product Lead, NovaCorp</div>
+        </div>
+      </div>
+    </div>
+    <div class="testimonial-card reveal" style="transition-delay:0.15s">
+      <div class="testimonial-stars">★★★★★</div>
+      <div class="testimonial-text">"Finally, an AI tool that doesn't make me feel stupid. The intent detection is magical — it understands what I need before I fully articulate it."</div>
+      <div class="testimonial-author">
+        <div class="author-avatar">JP</div>
+        <div>
+          <div class="author-name">Jade Park</div>
+          <div class="author-role">Founder, StudioMind</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section id="cta">
+  <div class="cta-bg-text">PROMPT</div>
+  <div class="cta-inner reveal">
+    <div class="section-label" style="text-align:center;display:block;margin-bottom:16px;">// Get Started Today</div>
+    <h2 class="cta-title">READY TO<br><em>STOP GUESSING</em>?</h2>
+    <p class="cta-desc">Join 50,000+ professionals who've stopped over-prompting and started producing. No credit card required.</p>
+    <div class="cta-actions">
+      <button class="btn-primary btn-xl" onclick="window.location='signuppage.html'">
+        Create Free Account
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+      <button class="btn-outline-xl" onclick="window.location='bookademo.html'">Book a Demo</button>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-logo">EUP</div>
+    <div class="footer-links">
+      <a href="#features">Features</a>
+      <a href="#pricing">Pricing</a>
+      <a href="blog.html">Blog</a>
+      <a href="docspage.html">Docs</a>
+      <a href="careerspage.html">Careers</a>
+      <a href="privacypage.html">Privacy</a>
+    </div>
+    <div class="footer-copy">© 2026 EUP — Excessive User Prompting</div>
+  </div>
+</footer>
+
+<script>
+  // ── LOADER ──
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      document.getElementById('loader').classList.add('hide');
+    }, 1500);
+  });
+
+  // ── CUSTOM CURSOR ──
+  const cursor = document.getElementById('cursor');
+  const ring = document.getElementById('cursor-ring');
+  document.addEventListener('mousemove', e => {
+    cursor.style.left = e.clientX + 'px';
+    cursor.style.top = e.clientY + 'px';
+    setTimeout(() => {
+      ring.style.left = e.clientX + 'px';
+      ring.style.top = e.clientY + 'px';
+    }, 60);
+  });
+
+  // ── FEATURE CARD MOUSE TRACKING ──
+  document.querySelectorAll('.feature-card').forEach(card => {
+    card.addEventListener('mousemove', e => {
+      const r = card.getBoundingClientRect();
+      const x = ((e.clientX - r.left) / r.width) * 100;
+      const y = ((e.clientY - r.top) / r.height) * 100;
+      card.style.setProperty('--mx', x + '%');
+      card.style.setProperty('--my', y + '%');
+    });
+  });
+
+  // ── SCROLL REVEAL ──
+  const revealObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.12 });
+
+  document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+  // ── TOAST ──
+  let toastTimer;
+  function showToast(msg) {
+    const toast = document.getElementById('toast');
+    document.getElementById('toast-msg').textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove('show'), 2800);
+  }
+
+  // ── NAVBAR SCROLL EFFECT ──
+  const nav = document.querySelector('nav');
+  window.addEventListener('scroll', () => {
+    if (window.scrollY > 60) {
+      nav.style.background = 'rgba(10,10,15,0.95)';
+    } else {
+      nav.style.background = 'rgba(10,10,15,0.7)';
+    }
+  });
+
+  // ── COUNTER ANIMATION ──
+  function animateCounter(el, target, suffix = '', duration = 1800) {
+    const start = performance.now();
+    const update = (time) => {
+      const progress = Math.min((time - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      el.textContent = (target * eased).toFixed(target % 1 !== 0 ? 1 : 0) + suffix;
+      if (progress < 1) requestAnimationFrame(update);
+    };
+    requestAnimationFrame(update);
+  }
+
+  const statsObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const nums = entry.target.querySelectorAll('.stat-num');
+        nums.forEach(num => {
+          const acc = num.querySelector('.acc');
+          const accText = acc ? acc.textContent : '';
+          if (acc) acc.remove();
+          const raw = parseFloat(num.textContent);
+          num.textContent = '0';
+          const newAcc = document.createElement('span');
+          newAcc.className = 'acc';
+          newAcc.textContent = accText;
+          animateCounter(num, raw, '', 2000);
+          setTimeout(() => num.appendChild(newAcc), 100);
+        });
+        statsObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.5 });
+
+  const heroStats = document.querySelector('.hero-stats');
+  if (heroStats) statsObserver.observe(heroStats);
+
+  // ── MOBILE MENU ──
+  const mobileMenu = document.getElementById('mobileMenu');
+  const navHamburger = document.getElementById('navHamburger');
+
+  function openMobileMenu() {
+    mobileMenu.hidden = false;
+    mobileMenu.classList.add('show');
+    navHamburger.classList.add('active');
+    navHamburger.setAttribute('aria-expanded', 'true');
+    document.body.classList.add('mobile-menu-open');
+  }
+
+  function closeMobileMenu() {
+    mobileMenu.classList.remove('show');
+    mobileMenu.hidden = true;
+    navHamburger.classList.remove('active');
+    navHamburger.setAttribute('aria-expanded', 'false');
+    document.body.classList.remove('mobile-menu-open');
+  }
+
+  function toggleMobileMenu() {
+    if (mobileMenu.classList.contains('show')) closeMobileMenu();
+    else openMobileMenu();
+  }
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && mobileMenu.classList.contains('show')) {
+      closeMobileMenu();
+    }
+  });
+
+  window.addEventListener('resize', () => {
+    if (window.innerWidth > 768 && mobileMenu.classList.contains('show')) {
+      closeMobileMenu();
+    }
+  });
+</script>
+</body>
+</html>

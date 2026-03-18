@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>EUP — Privacy Policy</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #0a0a0f;
+      --surface: #111118;
+      --card: #16161f;
+      --accent: #e8ff47;
+      --accent2: #00d2ff;
+      --text: #f0f0f8;
+      --muted: #6b6b8a;
+      --border: rgba(255,255,255,0.08);
+      --glow: rgba(232,255,71,0.14);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.65;
+      min-height: 100vh;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      opacity: .45;
+      z-index: 1;
+    }
+
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 32px;
+      background: rgba(10,10,15,.82);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+    }
+    .logo {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 28px;
+      letter-spacing: 3px;
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .logo span { color: var(--text); }
+    .nav-links { display: flex; gap: 20px; }
+    .nav-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .nav-links a:hover { color: var(--text); }
+
+    .wrap {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 52px 24px 90px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .tag {
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      border: 1px solid rgba(232,255,71,.3);
+      color: var(--accent);
+      background: rgba(232,255,71,.05);
+      border-radius: 999px;
+      padding: 5px 12px;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      font-family: 'Space Mono', monospace;
+      margin-bottom: 18px;
+    }
+    .title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(44px, 7vw, 90px);
+      line-height: .92;
+      letter-spacing: 1px;
+      margin-bottom: 10px;
+    }
+    .title em { color: var(--accent); font-style: normal; }
+    .sub {
+      color: var(--muted);
+      margin-bottom: 30px;
+      font-size: 14px;
+      font-family: 'Space Mono', monospace;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 26px;
+      margin-bottom: 16px;
+    }
+    h2 {
+      font-family: 'Bebas Neue', sans-serif;
+      letter-spacing: 1px;
+      font-size: 34px;
+      margin-bottom: 10px;
+    }
+    h2 em { color: var(--accent); font-style: normal; }
+    p, li { color: #cfcfe2; font-size: 15px; }
+    ul { padding-left: 18px; margin-top: 10px; }
+    li { margin-bottom: 8px; }
+
+    .notice {
+      background: rgba(0,210,255,.08);
+      border: 1px solid rgba(0,210,255,.22);
+      color: #cbefff;
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin-bottom: 18px;
+      font-size: 14px;
+    }
+
+    .cta {
+      margin-top: 28px;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .btn {
+      text-decoration: none;
+      border-radius: 8px;
+      padding: 12px 18px;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: .5px;
+    }
+    .btn-primary {
+      background: var(--accent);
+      color: #0a0a0f;
+      box-shadow: 0 10px 28px var(--glow);
+    }
+    .btn-ghost {
+      color: var(--text);
+      border: 1px solid var(--border);
+      background: transparent;
+    }
+
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 24px;
+      text-align: center;
+      color: var(--muted);
+      position: relative;
+      z-index: 2;
+      background: var(--surface);
+      font-size: 12px;
+      font-family: 'Space Mono', monospace;
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="homepage.html" class="logo">E<span>U</span>P</a>
+    <div class="nav-links">
+      <a href="homepage.html">Home</a>
+      <a href="docspage.html">Docs</a>
+      <a href="termspage.html">Terms</a>
+      <a href="bookademo.html">Contact</a>
+    </div>
+  </nav>
+
+  <main class="wrap">
+    <div class="tag">Policy • Legal</div>
+    <h1 class="title">PRIVACY <em>POLICY</em></h1>
+    <p class="sub">Effective date: March 7, 2026 · Last updated: March 7, 2026</p>
+
+    <div class="notice">We only collect data needed to provide EUP services, secure your account, and improve product performance.</div>
+
+    <section class="card">
+      <h2>WHAT WE <em>COLLECT</em></h2>
+      <p>We collect account details, workspace usage events, and support messages. We do not sell your personal data to third parties.</p>
+      <ul>
+        <li>Account info: name, email, profile metadata</li>
+        <li>Service data: prompt metadata, run statistics, logs</li>
+        <li>Billing data: plan and payment status via payment providers</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2>HOW WE <em>USE</em> DATA</h2>
+      <ul>
+        <li>Provide account access, workspace sync, and analytics</li>
+        <li>Protect against abuse, fraud, and unauthorized access</li>
+        <li>Send transactional emails like verification and password reset</li>
+        <li>Improve reliability, performance, and product features</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2>RETENTION & <em>SECURITY</em></h2>
+      <p>Data is retained as long as required to provide service and comply with law. We use encryption at rest/in transit and role-based access controls for internal systems.</p>
+    </section>
+
+    <section class="card">
+      <h2>YOUR <em>RIGHTS</em></h2>
+      <p>You can request access, correction, or deletion of personal data by contacting support. You can also close your account at any time.</p>
+    </section>
+
+    <div class="cta">
+      <a href="termspage.html" class="btn btn-ghost">Read Terms of Service</a>
+      <a href="bookademo.html" class="btn btn-primary">Contact Support</a>
+    </div>
+  </main>
+
+  <footer>© 2026 EUP — Excessive User Prompting</footer>
+</body>
+</html>
